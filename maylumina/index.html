@@ -595,9 +595,49 @@
     /* ═══════════════════════════════════════
        RESPONSIVE
     ═══════════════════════════════════════ */
+    /* ═══════════════════════════════════════
+       RESPONSIVE — TABLET
+    ═══════════════════════════════════════ */
     @media (max-width: 768px) {
+      .hero {
+        padding: 1.5rem;
+        justify-content: center;
+      }
+
+      .hero__logo {
+        font-size: 1rem;
+        letter-spacing: 0.3em;
+        margin-bottom: 1.5rem;
+      }
+
+      .hero__title {
+        font-size: clamp(2.8rem, 10vw, 4.5rem);
+        line-height: 1;
+      }
+
+      .hero__subtitle {
+        font-size: 0.95rem;
+        max-width: 90%;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+      }
+
+      .hero__cta {
+        padding: 0.85rem 2rem;
+        font-size: 0.8rem;
+      }
+
       .section-inner {
-        padding: 4rem 1.5rem;
+        padding: 3.5rem 1.5rem;
+      }
+
+      .section-title {
+        font-size: clamp(1.6rem, 5vw, 2.2rem);
+      }
+
+      .section-text {
+        font-size: 0.9rem;
+        line-height: 1.7;
       }
 
       .cores__grid {
@@ -605,8 +645,20 @@
       }
 
       .produtos__grid {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .produto-card__info {
+        padding: 1rem;
+      }
+
+      .produto-card__name {
+        font-size: 1.1rem;
+      }
+
+      .produto-card__desc {
+        font-size: 0.8rem;
       }
 
       .footer__links {
@@ -617,6 +669,155 @@
       .ritual__phrases {
         flex-direction: column;
         align-items: center;
+      }
+
+      .ritual__phrase {
+        font-size: 0.9rem;
+      }
+
+      .footer {
+        padding: 3rem 1.5rem;
+      }
+    }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE — CELULAR
+    ═══════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .hero {
+        padding: 1rem;
+        min-height: 100svh;
+      }
+
+      .hero__logo {
+        font-size: 0.8rem;
+        letter-spacing: 0.25em;
+        margin-bottom: 1.2rem;
+      }
+
+      .hero__title {
+        font-size: clamp(2.2rem, 12vw, 3.5rem);
+        line-height: 0.95;
+        margin-bottom: 1rem;
+      }
+
+      .hero__subtitle {
+        font-size: 0.85rem;
+        max-width: 95%;
+        line-height: 1.6;
+        font-weight: 400;
+        margin-bottom: 1.5rem;
+      }
+
+      .hero__cta {
+        padding: 0.8rem 1.8rem;
+        font-size: 0.75rem;
+      }
+
+      .hero__scroll-hint {
+        bottom: 1rem;
+      }
+
+      .section-inner {
+        padding: 3rem 1.2rem;
+      }
+
+      .section-label {
+        font-size: 0.65rem;
+        margin-bottom: 1rem;
+      }
+
+      .section-title {
+        font-size: clamp(1.4rem, 6vw, 1.8rem);
+        margin-bottom: 1.2rem;
+      }
+
+      .section-title br {
+        display: none;
+      }
+
+      .section-text {
+        font-size: 0.85rem;
+        line-height: 1.7;
+      }
+
+      .sobre__signature {
+        font-size: 1.1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+      }
+
+      .cores__grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .cor-card {
+        padding: 1.5rem;
+      }
+
+      .cor-card__name {
+        font-size: 1.2rem;
+      }
+
+      .cor-card__desc {
+        font-size: 0.82rem;
+      }
+
+      .produtos__grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+      }
+
+      .produto-card__media {
+        aspect-ratio: 4/3;
+      }
+
+      .produto-card__info {
+        padding: 1rem;
+      }
+
+      .produto-card__name {
+        font-size: 1.1rem;
+      }
+
+      .produto-card__desc {
+        font-size: 0.8rem;
+        margin-bottom: 0.6rem;
+      }
+
+      .produto-card__price {
+        font-size: 1rem;
+      }
+
+      .ritual__phrases {
+        gap: 0.7rem;
+      }
+
+      .ritual__phrase {
+        font-size: 0.85rem;
+        padding: 0.6rem 1.2rem;
+      }
+
+      .footer {
+        padding: 2.5rem 1.2rem;
+      }
+
+      .footer__brand {
+        font-size: 1.4rem;
+      }
+
+      .footer__tagline {
+        font-size: 0.9rem;
+      }
+
+      .footer__copy {
+        font-size: 0.7rem;
+      }
+
+      /* Video bg on mobile — ensure it covers properly */
+      .video-bg-container video {
+        object-position: center center;
       }
     }
 
