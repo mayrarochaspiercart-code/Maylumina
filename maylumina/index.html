@@ -292,6 +292,34 @@
 
     .carrossel__dot.active { background: white; }
 
+    /* ── Swipe Carousel (touch-friendly horizontal scroll) ── */
+    .swipe-carousel {
+      max-width: 500px;
+      margin: 2rem auto;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    .swipe-carousel__track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .swipe-carousel__track::-webkit-scrollbar { display: none; }
+
+    .swipe-carousel__slide {
+      flex: 0 0 100%;
+      width: 100%;
+      object-fit: cover;
+      scroll-snap-align: start;
+      aspect-ratio: 3/4;
+    }
+
     .section-inner {
       max-width: 1100px;
       margin: 0 auto;
@@ -310,18 +338,25 @@
 
     .section-title {
       font-family: var(--font-display);
-      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
       font-weight: 300;
       line-height: 1.2;
       margin-bottom: 2rem;
     }
 
     .section-text {
-      font-size: 1rem;
+      font-size: 1.15rem;
       font-weight: 300;
       line-height: 1.85;
       color: var(--texto-light);
       max-width: 680px;
+    }
+
+    /* ═══════════════════════════════════════
+       SECTION: BEMVINDOS — constrain image
+    ═══════════════════════════════════════ */
+    .bemvindos .foto-destaque {
+      max-width: 400px;
     }
 
     /* ═══════════════════════════════════════
@@ -969,9 +1004,15 @@
         <div class="reveal" style="margin-top:3rem;">
           <p style="font-family:var(--font-display);font-size:1.3rem;color:white;font-style:italic;margin-bottom:2rem;">E essa é a história da MayLumina… ✨<br>Agora, que tal me conhecer um pouquinho? 💗</p>
           
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:700px;margin:0 auto;">
-            <img src="assets/images/foto5.jpeg" alt="May - Quem sou eu?" style="width:100%;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
-            <img src="assets/images/foto6.jpeg" alt="May Rocha" style="width:100%;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+          <div class="swipe-carousel reveal" id="carrossel-may">
+            <div class="swipe-carousel__track">
+              <img src="assets/images/foto5.jpeg" alt="May - Quem sou eu?" class="swipe-carousel__slide">
+              <img src="assets/images/foto6.jpeg" alt="May Rocha" class="swipe-carousel__slide">
+            </div>
+            <div class="carrossel__dots">
+              <span class="carrossel__dot active" onclick="goToSwipe('carrossel-may',0)"></span>
+              <span class="carrossel__dot" onclick="goToSwipe('carrossel-may',1)"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -980,24 +1021,31 @@
     <!-- CRIAÇÃO DOS PRODUTOS -->
     <section class="glass-section criacao" id="criacao">
       <div class="section-inner">
-        <div class="criacao__fotos reveal" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:3rem;">
-          <img src="assets/images/foto7.jpeg" alt="Criação MayLumina" style="width:100%;border-radius:16px;aspect-ratio:1;object-fit:cover;">
-          <img src="assets/images/foto8.jpeg" alt="Criação MayLumina" style="width:100%;border-radius:16px;aspect-ratio:1;object-fit:cover;">
-          <img src="assets/images/foto9.jpeg" alt="Criação MayLumina" style="width:100%;border-radius:16px;aspect-ratio:1;object-fit:cover;">
+        <div class="swipe-carousel reveal" id="carrossel-criacao">
+          <div class="swipe-carousel__track">
+            <img src="assets/images/foto7.jpeg" alt="Criação MayLumina" class="swipe-carousel__slide">
+            <img src="assets/images/foto8.jpeg" alt="Criação MayLumina" class="swipe-carousel__slide">
+            <img src="assets/images/foto9.jpeg" alt="Criação MayLumina" class="swipe-carousel__slide">
+          </div>
+          <div class="carrossel__dots">
+            <span class="carrossel__dot active" onclick="goToSwipe('carrossel-criacao',0)"></span>
+            <span class="carrossel__dot" onclick="goToSwipe('carrossel-criacao',1)"></span>
+            <span class="carrossel__dot" onclick="goToSwipe('carrossel-criacao',2)"></span>
+          </div>
         </div>
 
         <div class="criacao__info" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;">
           <div class="reveal">
             <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:500;color:white;margin-bottom:0.8rem;">Criação & Produção</h3>
-            <p class="section-text" style="color:rgba(255,255,255,0.9);font-size:0.9rem;">Eu crio e produzo cada produto Maylumina, desde a ideia até a execução, com estudo e planejamento para cada criação.</p>
+            <p class="section-text" style="color:rgba(255,255,255,0.9);font-size:1.05rem;">Eu crio e produzo cada produto Maylumina, desde a ideia até a execução, com estudo e planejamento para cada criação.</p>
           </div>
           <div class="reveal">
             <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:500;color:white;margin-bottom:0.8rem;">Propriedades & Identidade</h3>
-            <p class="section-text" style="color:rgba(255,255,255,0.9);font-size:0.9rem;">Faço a extração e preparação das propriedades de origem vegetal com cuidado e segurança. Cada produto possui sua própria Art, fragrância e combinação de propriedades.</p>
+            <p class="section-text" style="color:rgba(255,255,255,0.9);font-size:1.05rem;">Faço a extração e preparação das propriedades de origem vegetal com cuidado e segurança. Cada produto possui sua própria Art, fragrância e combinação de propriedades.</p>
           </div>
           <div class="reveal">
             <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:500;color:white;margin-bottom:0.8rem;">Personalizados</h3>
-            <p class="section-text" style="color:rgba(255,255,255,0.9);font-size:0.9rem;">Além da vitrine, também faço kits e produtos personalizados, escolhendo junto com cada cliente a fragrância, propriedades e estética. Pedidos personalizados possuem prazo de produção. ✨</p>
+            <p class="section-text" style="color:rgba(255,255,255,0.9);font-size:1.05rem;">Além da vitrine, também faço kits e produtos personalizados, escolhendo junto com cada cliente a fragrância, propriedades e estética. Pedidos personalizados possuem prazo de produção. ✨</p>
           </div>
         </div>
       </div>
@@ -1303,6 +1351,43 @@
     }, { threshold: 0.3 });
 
     document.querySelectorAll('.produto-card').forEach(card => videoObserver.observe(card));
+
+    // ═══════════════════════════════════════
+    // SWIPE CAROUSELS (touch-friendly)
+    // ═══════════════════════════════════════
+    function goToSwipe(carouselId, index) {
+      const carousel = document.getElementById(carouselId);
+      if (!carousel) return;
+      const track = carousel.querySelector('.swipe-carousel__track');
+      const slideWidth = track.offsetWidth;
+      track.scrollTo({ left: slideWidth * index, behavior: 'smooth' });
+      
+      // Update dots
+      carousel.querySelectorAll('.carrossel__dot').forEach((d, i) => {
+        d.classList.toggle('active', i === index);
+      });
+    }
+
+    // Update dots on manual scroll/swipe
+    document.querySelectorAll('.swipe-carousel__track').forEach(track => {
+      const carousel = track.closest('.swipe-carousel');
+      const dots = carousel.querySelectorAll('.carrossel__dot');
+      
+      track.addEventListener('scrollend', () => {
+        const index = Math.round(track.scrollLeft / track.offsetWidth);
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+      });
+      
+      // Fallback for browsers without scrollend
+      let scrollTimeout;
+      track.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          const index = Math.round(track.scrollLeft / track.offsetWidth);
+          dots.forEach((d, i) => d.classList.toggle('active', i === index));
+        }, 100);
+      });
+    });
 
     // ═══════════════════════════════════════
     // CARROSSEL
