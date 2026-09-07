@@ -79,13 +79,7 @@
       z-index: 1;
       /* e um fundo, nao um player: nunca recebe toque nem mostra controles */
       pointer-events: none;
-      /* invisivel ate tocar de verdade: se o navegador bloquear o autoplay,
-         aparece o gradiente animado no lugar — nunca um botao de play */
-      opacity: 0;
-      transition: opacity 0.9s ease;
     }
-
-    .video-bg-container video.tocando { opacity: 1; }
 
     .video-bg-container video::-webkit-media-controls,
     .video-bg-container video::-webkit-media-controls-start-playback-button {
@@ -93,9 +87,13 @@
       -webkit-appearance: none;
     }
 
-    /* Placeholder gradient — sits behind video, visible only if video fails */
+    /* Cortina: fica SOBRE o video ate ele tocar de verdade. Assim o video
+       continua visivel para o navegador (autoplay so vale para video visivel)
+       e, se o autoplay for bloqueado, o visitante ve o gradiente da marca —
+       nunca um botao de play. */
     .video-fallback {
-      z-index: 0;
+      z-index: 2;
+      transition: opacity 1s ease;
       background: linear-gradient(
         135deg,
         var(--creme) 0%,
@@ -108,6 +106,8 @@
       animation: gradientFlow 12s ease infinite;
     }
 
+    .video-fallback.escondido { opacity: 0; }
+
     @keyframes gradientFlow {
       0%   { background-position: 0% 50%; }
       50%  { background-position: 100% 50%; }
@@ -119,7 +119,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      z-index: 2;
+      z-index: 3;
       background: rgba(245, 240, 232, 0.15);
       pointer-events: none;
     }
@@ -410,35 +410,49 @@
       font-size: 0.9rem;
     }
 
-    /* ── Carrossel ── */
-    .carrossel {
-      position: relative;
-      max-width: 380px;
-      margin: 2.5rem auto 0;
-      border-radius: 4px;
+    /* ── Carrossel infinito: as fotos deslizam da direita para a esquerda,
+          em loop continuo. Dois conjuntos identicos + translateX(-50%) fazem
+          a volta ser exata, sem emenda visivel. ── */
+    .carrossel-infinito {
+      /* sangra para a largura total da tela */
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
       overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      padding: 0.5rem 0;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+              mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
     }
 
-    .carrossel__track {
-      position: relative;
-      width: 100%;
+    .carrossel-infinito__track {
+      display: flex;
+      width: max-content;
+      animation: deslizaFotos 36s linear infinite;
+    }
+
+    .carrossel-infinito:hover .carrossel-infinito__track { animation-play-state: paused; }
+
+    .carrossel-infinito__set {
+      display: flex;
+      gap: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    .carrossel-infinito__set img {
+      width: clamp(190px, 24vw, 300px);
       aspect-ratio: 3/4;
-    }
-
-    .carrossel__slide {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
       object-fit: cover;
       object-position: center top;
-      opacity: 0;
-      transition: opacity 0.8s ease;
+      display: block;
+      border-radius: 4px;
+      box-shadow: 0 10px 32px rgba(58, 47, 47, 0.18);
     }
 
-    .carrossel__slide.active { opacity: 1; }
+    @keyframes deslizaFotos {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
 
+    /* Os dots seguem em uso pelo carrossel deslizavel de "quem sou eu" */
     .carrossel__dots {
       display: flex;
       justify-content: center;
@@ -1103,9 +1117,6 @@
         object-position: center center;
       }
 
-      /* Carrossel mobile */
-      .carrossel { max-width: 100%; }
-
       /* Marquee mais discreto no celular */
       .marquee__item {
         font-size: 0.68rem;
@@ -1236,17 +1247,25 @@
           Sejam bem-vindos ao meu universo! 🌷✨
         </p>
 
-        <!-- Carrossel -->
-        <div class="carrossel reveal" id="carrossel">
-          <div class="carrossel__track">
-            <img src="assets/images/foto2.jpeg" alt="MayLumina" class="carrossel__slide active">
-            <img src="assets/images/foto3.jpeg" alt="MayLumina" class="carrossel__slide">
-            <img src="assets/images/foto4.jpeg" alt="MayLumina" class="carrossel__slide">
-          </div>
-          <div class="carrossel__dots">
-            <span class="carrossel__dot active" onclick="goToSlide(0)"></span>
-            <span class="carrossel__dot" onclick="goToSlide(1)"></span>
-            <span class="carrossel__dot" onclick="goToSlide(2)"></span>
+        <!-- Esteira infinita de fotos -->
+        <div class="carrossel-infinito reveal" id="carrossel" style="margin-top:2.5rem;">
+          <div class="carrossel-infinito__track">
+            <div class="carrossel-infinito__set">
+              <img src="assets/images/foto2.jpeg" alt="MayLumina">
+              <img src="assets/images/foto3.jpeg" alt="MayLumina">
+              <img src="assets/images/foto2.jpeg" alt="MayLumina">
+              <img src="assets/images/foto3.jpeg" alt="MayLumina">
+              <img src="assets/images/foto2.jpeg" alt="MayLumina">
+              <img src="assets/images/foto3.jpeg" alt="MayLumina">
+            </div>
+            <div class="carrossel-infinito__set" aria-hidden="true">
+              <img src="assets/images/foto2.jpeg" alt="">
+              <img src="assets/images/foto3.jpeg" alt="">
+              <img src="assets/images/foto2.jpeg" alt="">
+              <img src="assets/images/foto3.jpeg" alt="">
+              <img src="assets/images/foto2.jpeg" alt="">
+              <img src="assets/images/foto3.jpeg" alt="">
+            </div>
           </div>
         </div>
       </div>
@@ -1721,97 +1740,6 @@
         }, 100);
       });
     });
-
-    // ═══════════════════════════════════════
-    // CARROSSEL
-    // ═══════════════════════════════════════
-    let currentSlide = 0;
-    const slides = document.querySelectorAll('.carrossel__slide');
-    const dots = document.querySelectorAll('.carrossel__dot');
-
-    function goToSlide(n) {
-      slides[currentSlide]?.classList.remove('active');
-      dots[currentSlide]?.classList.remove('active');
-      currentSlide = n;
-      slides[currentSlide]?.classList.add('active');
-      dots[currentSlide]?.classList.add('active');
-    }
-
-    // Auto-advance every 4s
-    if (slides.length > 0) {
-      setInterval(() => {
-        goToSlide((currentSlide + 1) % slides.length);
-      }, 4000);
-    }
-
-    // ═══════════════════════════════════════
-    // FUNDO EM VÍDEO — autoplay garantido
-    // É um fundo, não um player: nunca deve pedir play ao visitante.
-    // ═══════════════════════════════════════
-    (function () {
-      const video = document.getElementById('hero-video');
-      if (!video) return;
-
-      // A propriedade (não só o atributo) é o que libera o autoplay sem gesto
-      video.muted = true;
-      video.defaultMuted = true;
-
-      let tocando = false;
-      let heroVisivel = true;
-
-      // Só revela o fundo quando ha reproducao confirmada.
-      // Rede de seguranca: alguns navegadores nao disparam 'playing' de forma
-      // confiavel, entao tambem conferimos se o tempo esta de fato correndo —
-      // assim o video nunca fica escondido estando tocando.
-      function revelar() { video.classList.add('tocando'); }
-      video.addEventListener('playing', revelar);
-
-      let ultimo = -1;
-      const vigia = setInterval(() => {
-        if (video.classList.contains('tocando')) { clearInterval(vigia); return; }
-        if (!video.paused && video.currentTime > 0 && video.currentTime !== ultimo) revelar();
-        ultimo = video.currentTime;
-      }, 400);
-
-      function tentarTocar() {
-        // fora do hero o fundo fica parado de proposito — o listener de
-        // scroll abaixo nao pode religa-lo
-        if (!heroVisivel || tocando || video.paused === false) return;
-        const p = video.play();
-        if (p && p.then) {
-          p.then(() => { tocando = true; }).catch(() => { /* tenta de novo depois */ });
-        }
-      }
-
-      // Tenta assim que houver quadro suficiente
-      tentarTocar();
-      video.addEventListener('loadeddata', tentarTocar);
-      video.addEventListener('canplay', tentarTocar);
-
-      // Se o navegador bloquear (economia de dados, bateria fraca),
-      // retoma no primeiro sinal de interação — sem nenhum botão visível.
-      ['touchstart', 'pointerdown', 'scroll', 'keydown'].forEach(ev => {
-        window.addEventListener(ev, tentarTocar, { passive: true });
-      });
-
-      // Voltar de outra aba não pode deixar o fundo congelado
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) tentarTocar();
-      });
-
-      // Fora do hero o vídeo não precisa rodar: economiza bateria e
-      // evita travamento ao rolar até os produtos.
-      const hero = document.getElementById('inicio');
-      if (hero && 'IntersectionObserver' in window) {
-        new IntersectionObserver(entries => {
-          entries.forEach(e => {
-            heroVisivel = e.isIntersecting;
-            if (heroVisivel) { tocando = false; tentarTocar(); }
-            else if (!video.paused) { video.pause(); tocando = false; }
-          });
-        }, { threshold: 0.01 }).observe(hero);
-      }
-    })();
 
     // ── Load products on page load ──
     loadProducts();
