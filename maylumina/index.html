@@ -1424,11 +1424,12 @@
           
           let mediaHTML;
           if (hasGif && hasImage) {
-            // GIF plays as intro, then crossfades to static image
+            // A foto estatica aparece de imediato; o GIF so e baixado quando
+            // o card chega perto da tela e entao entra por cima.
             mediaHTML = `
-              <img src="${videoUrl}" alt="" class="produto-gif" data-intro="true"
-                   loading="lazy" decoding="async">
-              <img src="${imageUrl}" alt="${p.nome}" loading="lazy" class="produto-img" style="opacity:0;">`;
+              <img data-src="${videoUrl}" alt="" class="produto-gif" data-intro="true"
+                   decoding="async" style="opacity:0;">
+              <img src="${imageUrl}" alt="${p.nome}" loading="lazy" class="produto-img">`;
           } else if (hasVideo && hasImage) {
             // MP4 video plays once, then image appears
             mediaHTML = `
@@ -1445,8 +1446,8 @@
                 <source src="${videoUrl}" type="video/mp4">
               </video>`;
           } else if (hasGif) {
-            // Only GIF, no static image
-            mediaHTML = `<img src="${videoUrl}" alt="${p.nome}" loading="lazy" class="produto-img">`;
+            // So GIF, sem foto estatica — tambem sob demanda
+            mediaHTML = `<img data-src="${videoUrl}" alt="${p.nome}" decoding="async" class="produto-img produto-gif">`;
           } else if (hasImage) {
             mediaHTML = `<img src="${imageUrl}" alt="${p.nome}" loading="lazy" class="produto-img">`;
           } else {
@@ -1541,22 +1542,13 @@
       return ['slow-2g', '2g', '3g'].includes(c.effectiveType);
     }
 
-    const GIF_PADRAO = 4000;   // usado quando nao vale a pena medir
-    const GIF_LIMITE  = 1024 * 1024;
+    const GIF_PADRAO = 3000;   // usado quando nao da para medir
+    const GIF_LIMITE  = 8 * 1024 * 1024;
 
-    async function getGifDuration(url) {
-      if (conexaoFraca()) return GIF_PADRAO;
+    // Recebe os bytes ja em maos: soma os delays dos quadros sem baixar nada
+    function getGifDuration(buffer) {
       try {
-        // Pergunta o tamanho ANTES de baixar: varrer um GIF grande na thread
-        // principal trava o celular (um GIF de 3 MB vira centenas de MB em RAM)
-        const head = await fetch(url, { method: 'HEAD' });
-        const tam = Number(head.headers.get('content-length') || 0);
-        if (tam > GIF_LIMITE) return GIF_PADRAO;
-
-        // force-cache: o <img> ja baixou esse GIF, aqui reaproveitamos o cache
-        const res = await fetch(url, { cache: 'force-cache' });
-        const buffer = await res.arrayBuffer();
-        if (buffer.byteLength > GIF_LIMITE) return GIF_PADRAO;
+        if (!buffer || buffer.byteLength > GIF_LIMITE) return GIF_PADRAO;
         const bytes = new Uint8Array(buffer);
         let totalDelay = 0;
         let i = 0;
@@ -1620,6 +1612,41 @@
       }
     }
 
+    // Baixa o GIF UMA vez: os mesmos bytes viram a imagem exibida e a medicao
+    // de duracao. Antes havia dois downloads do mesmo arquivo.
+    async function carregarGif(gif, url) {
+      const mostrar = () => {
+        gif.style.transition = 'opacity 0.5s ease';
+        gif.style.opacity = '1';
+      };
+      const voltarParaFoto = (duracao) => {
+        if (gif.dataset.intro !== 'true') return;
+        setTimeout(() => {
+          const card = gif.closest('.produto-card');
+          const foto = card && card.querySelector('img.produto-img');
+          if (!foto) return;
+          foto.style.transition = 'opacity 0.5s ease';
+          foto.style.opacity = '1';
+          gif.style.transition = 'opacity 0.5s ease';
+          gif.style.opacity = '0';
+        }, duracao);
+      };
+
+      try {
+        if (conexaoFraca()) throw new Error('conexao fraca');
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(res.status);
+        const buffer = await res.arrayBuffer();
+        const duracao = getGifDuration(buffer);
+        gif.addEventListener('load', () => { mostrar(); voltarParaFoto(duracao); }, { once: true });
+        gif.src = URL.createObjectURL(new Blob([buffer], { type: 'image/gif' }));
+      } catch (e) {
+        // Sem fetch (CORS, rede) o <img> ainda da conta sozinho
+        gif.addEventListener('load', () => { mostrar(); voltarParaFoto(GIF_PADRAO); }, { once: true });
+        gif.src = url;
+      }
+    }
+
     // ── Video/GIF behavior: play once when visible, then crossfade to image ──
     const videoObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1641,25 +1668,18 @@
           }, { once: true });
         }
         
-        // Handle GIF intro — parse GIF to get exact duration of 1 loop
-        const gif = entry.target.querySelector('img.produto-gif[data-intro="true"]');
+        // GIF: baixa so agora, entra por cima da foto e depois de um ciclo
+        // devolve o lugar para a foto estatica
+        const gif = entry.target.querySelector('img.produto-gif');
         if (gif && !gif.dataset.played) {
           gif.dataset.played = 'true';
-          
-          getGifDuration(gif.src).then(duration => {
-            setTimeout(() => {
-              const img = entry.target.querySelector('img.produto-img');
-              if (img) {
-                img.style.transition = 'opacity 0.5s ease';
-                img.style.opacity = '1';
-                gif.style.transition = 'opacity 0.5s ease';
-                gif.style.opacity = '0';
-              }
-            }, duration);
-          });
+          const url = gif.dataset.src || gif.src;
+
+          gif.addEventListener('error', () => { gif.style.opacity = '0'; }, { once: true });
+          carregarGif(gif, url);
         }
       });
-    }, { threshold: 0.3 });
+    }, { threshold: 0.1, rootMargin: '300px 0px' });
 
     document.querySelectorAll('.produto-card').forEach(card => videoObserver.observe(card));
 
