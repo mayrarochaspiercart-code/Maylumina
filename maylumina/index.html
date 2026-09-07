@@ -222,50 +222,75 @@
     }
 
     /* Sobre: gradiente camaleão laranja */
-    .sobre {
+    .bemvindos {
       background: linear-gradient(135deg, #F0944E, #E91E8C, #F0944E, #E91E8C);
       background-size: 400% 400%;
       animation: gradientFlow 10s ease infinite;
-      color: white;
     }
 
-    .sobre .section-label { color: white; }
-    .sobre .section-title { color: white; }
-    .sobre .section-text { color: rgba(255,255,255,0.9); }
-    .sobre .sobre__signature { color: white; }
-
-    /* Cores: gradiente camaleão pink */
-    .cores {
-      background: linear-gradient(135deg, #E91E8C, #8B4F9F, #E91E8C, #F0944E);
-      background-size: 400% 400%;
-      animation: gradientFlow 12s ease infinite;
-    }
-
-    .cores .section-label { color: white; }
-    .cores .section-title { color: white; }
-
-    /* Produtos: gradiente camaleão turquesa */
-    .glass-section#produtos-section {
-      background: linear-gradient(135deg, #00CCA8, #8B4F9F, #00CCA8, #E91E8C);
+    .universo {
+      background: linear-gradient(135deg, #8B4F9F, #E91E8C, #00CCA8, #8B4F9F);
       background-size: 400% 400%;
       animation: gradientFlow 14s ease infinite;
     }
 
-    .glass-section#produtos-section .section-label { color: white; }
-    .glass-section#produtos-section .section-title { color: white; }
-    .glass-section#produtos-section .section-text { color: rgba(255,255,255,0.9); }
-
-    /* Ritual: gradiente camaleão roxo */
-    .ritual {
-      background: linear-gradient(135deg, #8B4F9F, #E91E8C, #00CCA8, #8B4F9F);
+    .criacao {
+      background: linear-gradient(135deg, #00CCA8, #8B4F9F, #E91E8C, #00CCA8);
       background-size: 400% 400%;
-      animation: gradientFlow 16s ease infinite;
-      color: white;
+      animation: gradientFlow 12s ease infinite;
     }
 
-    .ritual .section-label { color: white; }
-    .ritual .section-title { color: white; }
-    .ritual .section-text { color: rgba(255,255,255,0.9); }
+    .loja {
+      background: linear-gradient(135deg, #E91E8C, #F0944E, #8B4F9F, #E91E8C);
+      background-size: 400% 400%;
+      animation: gradientFlow 16s ease infinite;
+    }
+
+    /* ── Carrossel ── */
+    .carrossel {
+      position: relative;
+      max-width: 600px;
+      margin: 2rem auto;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    .carrossel__track {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3/4;
+    }
+
+    .carrossel__slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .carrossel__slide.active { opacity: 1; }
+
+    .carrossel__dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .carrossel__dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .carrossel__dot.active { background: white; }
 
     .section-inner {
       max-width: 1100px;
@@ -819,6 +844,19 @@
       .video-bg-container video {
         object-position: center center;
       }
+
+      /* Carrossel mobile */
+      .carrossel { max-width: 100%; }
+
+      /* Criação grid → stack on mobile */
+      .criacao__fotos,
+      .criacao__info {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+      }
+
+      /* Universo: fotos side by side → stack */
+      .historia { text-align: left !important; }
     }
 
     /* Reduced motion */
@@ -876,129 +914,106 @@
       </div>
     </section>
 
-    <!-- SOBRE -->
-    <section class="glass-section sobre" id="sobre">
-      <div class="section-inner">
-        <p class="section-label reveal">Sobre a marca</p>
-
-        <h2 class="section-title reveal">
-          Onde autocuidado, arte<br>e propósito se encontram.
-        </h2>
-
-        <p class="section-text reveal">
-          Maylumina é uma marca de Art Body Care criada para transformar o
-          autocuidado em uma experiência sensorial, estética e cheia de
-          propósito. O nome une "May", apelido da fundadora, com "Lumina",
-          que representa luz, brilho e presença.
+    <!-- BEM-VINDOS -->
+    <section class="glass-section bemvindos" id="bemvindos">
+      <div class="section-inner" style="text-align:center;">
+        <h2 class="section-title reveal" style="color:white;">Sejam bem-vindos ao meu site!</h2>
+        
+        <div class="foto-destaque reveal" style="margin:2.5rem auto; max-width:500px;">
+          <img src="assets/images/foto1.jpeg" alt="May Rocha" style="width:100%;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+        </div>
+        
+        <p class="section-text reveal" style="max-width:600px;margin:0 auto;color:rgba(255,255,255,0.95);text-align:center;font-size:1.05rem;">
+          Oi, meus amores! Aqui vocês vão conhecer a história da MayLumina, minhas criações, conteúdos sobre beleza, autocuidado, arte e muito mais. ✨ Explore o site e venha conferir tudo o que preparei para vocês!
         </p>
-
-        <p class="section-text reveal">
-          Nossos produtos unem aromas, texturas, cores e brilho para criar
-          momentos de cuidado com intenção. Óleos essenciais, produtos
-          corporais e maquiagens não são apenas itens de beleza: são formas
-          de relaxar, hidratar, iluminar e revelar diferentes versões de
-          quem você é.
-        </p>
-
-        <p class="sobre__signature reveal">Sua luz também tem cor.</p>
       </div>
     </section>
 
-    <!-- CORES -->
-    <section class="cores" id="cores">
-      <div class="section-inner">
-        <p class="section-label reveal">A paleta</p>
-
-        <h2 class="section-title reveal">
-          Cada cor tem uma intenção.
-        </h2>
-
-        <div class="cores__grid">
-
-          <div class="cor-card cor-card--creme reveal reveal-delay-1">
-            <div class="cor-card__stripe" style="background: var(--creme); box-shadow: inset -1px 0 0 rgba(0,0,0,0.08);"></div>
-            <p class="cor-card__name">Crème</p>
-            <p class="cor-card__desc">A base da marca. Leveza, elegância, pureza e acolhimento.</p>
+    <!-- UNIVERSO + HISTÓRIA -->
+    <section class="glass-section universo" id="universo">
+      <div class="section-inner" style="text-align:center;">
+        <h2 class="section-title reveal" style="color:white;">Sejam bem-vindos ao meu universo! 🌷✨</h2>
+        
+        <!-- Carrossel -->
+        <div class="carrossel reveal" id="carrossel">
+          <div class="carrossel__track">
+            <img src="assets/images/foto2.jpeg" alt="MayLumina" class="carrossel__slide active">
+            <img src="assets/images/foto3.jpeg" alt="MayLumina" class="carrossel__slide">
+            <img src="assets/images/foto4.jpeg" alt="MayLumina" class="carrossel__slide">
           </div>
-
-          <div class="cor-card cor-card--laranja reveal reveal-delay-2">
-            <div class="cor-card__stripe" style="background: var(--laranja);"></div>
-            <p class="cor-card__name">Laranja</p>
-            <p class="cor-card__desc">A essência da fundadora. Energia, calor, presença e identidade.</p>
+          <div class="carrossel__dots">
+            <span class="carrossel__dot active" onclick="goToSlide(0)"></span>
+            <span class="carrossel__dot" onclick="goToSlide(1)"></span>
+            <span class="carrossel__dot" onclick="goToSlide(2)"></span>
           </div>
+        </div>
 
-          <div class="cor-card cor-card--pink reveal reveal-delay-3">
-            <div class="cor-card__stripe" style="background: var(--pink);"></div>
-            <p class="cor-card__name">Pink</p>
-            <p class="cor-card__desc">Intensidade, paixão, feminilidade vibrante e presença marcante.</p>
+        <!-- História -->
+        <div class="historia reveal" style="max-width:700px;margin:3rem auto 0;text-align:left;">
+          <h3 style="font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.2rem);font-weight:500;color:white;margin-bottom:1.5rem;text-align:center;font-style:italic;">Entre Sussurros de Luz ✨</h3>
+          
+          <p class="section-text" style="color:rgba(255,255,255,0.9);margin-bottom:1rem;">Antes de existir a MayLumina, existia apenas uma luz dentro de mim. Uma luz que outras pessoas percebiam antes mesmo que eu pudesse entendê-la. Muitas vezes, ouvi que carregava algo diferente, uma luz forte, uma energia que fazia parte de quem eu sou.</p>
+          
+          <p class="section-text" style="color:rgba(255,255,255,0.9);margin-bottom:1rem;">Foi desse sentimento, quase como um pequeno sussurro, que nasceu a MayLumina — Mayra iluminada.</p>
+          
+          <p class="section-text" style="color:rgba(255,255,255,0.9);margin-bottom:1rem;">Mas a MayLumina nunca foi apenas sobre criar uma marca. Ela nasceu para ser um universo com identidade, criatividade e arte. Um lugar onde tudo pudesse carregar um pouco de mim.</p>
+          
+          <p class="section-text" style="color:rgba(255,255,255,0.9);margin-bottom:1rem;">Aqui, as cores ganham vida, as ideias viram criação e minhas mãos se transformam em pincéis. Cada produto, cada detalhe e cada escolha são uma forma de transformar aquilo que existe na minha imaginação em algo real.</p>
+          
+          <p class="section-text" style="color:rgba(255,255,255,0.9);margin-bottom:1rem;">A MayLumina é a minha maneira de deixar essa luz escapar de dentro de mim e chegar até outras pessoas.</p>
+          
+          <p class="section-text" style="color:white;font-style:italic;text-align:center;margin-top:2rem;font-family:var(--font-display);font-size:1.15rem;">Porque, no fim, talvez seja isso que a MayLumina sempre tenha sido: um sonho contado em cores, criado com as mãos e iluminado pelo coração.</p>
+        </div>
+
+        <!-- Conhecer May -->
+        <div class="reveal" style="margin-top:3rem;">
+          <p style="font-family:var(--font-display);font-size:1.3rem;color:white;font-style:italic;margin-bottom:2rem;">E essa é a história da MayLumina… ✨<br>Agora, que tal me conhecer um pouquinho? 💗</p>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;max-width:700px;margin:0 auto;">
+            <img src="assets/images/foto5.jpeg" alt="May - Quem sou eu?" style="width:100%;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+            <img src="assets/images/foto6.jpeg" alt="May Rocha" style="width:100%;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
           </div>
-
-          <div class="cor-card cor-card--turquesa reveal reveal-delay-4">
-            <div class="cor-card__stripe" style="background: var(--turquesa);"></div>
-            <p class="cor-card__name">Turquesa</p>
-            <p class="cor-card__desc">Frescor, calma, equilíbrio e brilho que surpreende.</p>
-          </div>
-
-          <div class="cor-card cor-card--roxo reveal reveal-delay-5">
-            <div class="cor-card__stripe" style="background: var(--roxo);"></div>
-            <p class="cor-card__name">Roxo</p>
-            <p class="cor-card__desc">Criatividade, mistério, maquiagem e transformação.</p>
-          </div>
-
         </div>
       </div>
     </section>
 
-    <!-- PRODUTOS -->
-    <section class="glass-section" id="produtos-section">
+    <!-- CRIAÇÃO DOS PRODUTOS -->
+    <section class="glass-section criacao" id="criacao">
       <div class="section-inner">
-        <p class="section-label reveal">Produtos</p>
+        <div class="criacao__fotos reveal" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:3rem;">
+          <img src="assets/images/foto7.jpeg" alt="Criação MayLumina" style="width:100%;border-radius:16px;aspect-ratio:1;object-fit:cover;">
+          <img src="assets/images/foto8.jpeg" alt="Criação MayLumina" style="width:100%;border-radius:16px;aspect-ratio:1;object-fit:cover;">
+          <img src="assets/images/foto9.jpeg" alt="Criação MayLumina" style="width:100%;border-radius:16px;aspect-ratio:1;object-fit:cover;">
+        </div>
 
-        <h2 class="section-title reveal">
-          Cada detalhe nasce para<br>despertar uma sensação.
-        </h2>
+        <div class="criacao__info" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;">
+          <div class="reveal">
+            <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:500;color:white;margin-bottom:0.8rem;">Criação & Produção</h3>
+            <p class="section-text" style="color:rgba(255,255,255,0.9);font-size:0.9rem;">Eu crio e produzo cada produto Maylumina, desde a ideia até a execução, com estudo e planejamento para cada criação.</p>
+          </div>
+          <div class="reveal">
+            <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:500;color:white;margin-bottom:0.8rem;">Propriedades & Identidade</h3>
+            <p class="section-text" style="color:rgba(255,255,255,0.9);font-size:0.9rem;">Faço a extração e preparação das propriedades de origem vegetal com cuidado e segurança. Cada produto possui sua própria Art, fragrância e combinação de propriedades.</p>
+          </div>
+          <div class="reveal">
+            <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:500;color:white;margin-bottom:0.8rem;">Personalizados</h3>
+            <p class="section-text" style="color:rgba(255,255,255,0.9);font-size:0.9rem;">Além da vitrine, também faço kits e produtos personalizados, escolhendo junto com cada cliente a fragrância, propriedades e estética. Pedidos personalizados possuem prazo de produção. ✨</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <p class="section-text reveal" style="margin-bottom: 1rem;">
-          Cada produto Maylumina nasce com uma intenção: relaxar, hidratar,
-          iluminar ou despertar uma nova versão de você.
-        </p>
-
-        <!-- 
-          PRODUTOS DINÂMICOS (Supabase)
-          Carrega automaticamente os produtos ativos do banco.
-        -->
+    <!-- PRODUTOS / LOJA -->
+    <section class="glass-section loja" id="produtos-section">
+      <div class="section-inner">
+        <p class="section-label reveal" style="color:white;">Produtos</p>
+        <h2 class="section-title reveal" style="color:white;">Cada detalhe nasce para despertar uma sensação.</h2>
         <div class="produtos__grid" id="produtos-grid">
-          <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--texto-light);">
-            Carregando produtos...
-          </div>
+          <div style="grid-column:1/-1;text-align:center;padding:3rem;color:rgba(255,255,255,0.7);">Carregando produtos...</div>
         </div>
       </div>
     </section>
 
-    <!-- RITUAL -->
-    <section class="ritual" id="experiencia">
-      <div class="section-inner">
-        <p class="section-label reveal">A experiência</p>
-
-        <h2 class="section-title reveal">
-          Não é só autocuidado.<br>É arte na pele.
-        </h2>
-
-        <p class="section-text reveal">
-          Com aromas envolventes, texturas marcantes, cores vibrantes e
-          brilhos camaleão, transformamos o cuidado diário em um ritual
-          artístico e cheio de significado.
-        </p>
-
-        <div class="ritual__phrases">
-          <span class="ritual__phrase reveal reveal-delay-1">Autocuidado com intenção</span>
-          <span class="ritual__phrase reveal reveal-delay-2">Beleza que toca e ilumina</span>
-          <span class="ritual__phrase reveal reveal-delay-3">Cores que revelam quem você é</span>
-          <span class="ritual__phrase reveal reveal-delay-4">A luz vem de Deus</span>
-          <span class="ritual__phrase reveal reveal-delay-5">O brilho se revela em você</span>
-        </div>
-      </div>
-    </section>
 
   </main>
 
@@ -1288,6 +1303,28 @@
     }, { threshold: 0.3 });
 
     document.querySelectorAll('.produto-card').forEach(card => videoObserver.observe(card));
+
+    // ═══════════════════════════════════════
+    // CARROSSEL
+    // ═══════════════════════════════════════
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carrossel__slide');
+    const dots = document.querySelectorAll('.carrossel__dot');
+
+    function goToSlide(n) {
+      slides[currentSlide]?.classList.remove('active');
+      dots[currentSlide]?.classList.remove('active');
+      currentSlide = n;
+      slides[currentSlide]?.classList.add('active');
+      dots[currentSlide]?.classList.add('active');
+    }
+
+    // Auto-advance every 4s
+    if (slides.length > 0) {
+      setInterval(() => {
+        goToSlide((currentSlide + 1) % slides.length);
+      }, 4000);
+    }
 
     // ── Load products on page load ──
     loadProducts();
