@@ -60,6 +60,9 @@
       height: 100vh;
       z-index: 0;
       overflow: hidden;
+      /* camada propria de composicao: evita repintar o fundo a cada scroll */
+      transform: translateZ(0);
+      backface-visibility: hidden;
     }
 
     .video-bg-container video,
@@ -74,6 +77,14 @@
 
     .video-bg-container video {
       z-index: 1;
+      /* e um fundo, nao um player: nunca recebe toque nem mostra controles */
+      pointer-events: none;
+    }
+
+    .video-bg-container video::-webkit-media-controls,
+    .video-bg-container video::-webkit-media-controls-start-playback-button {
+      display: none !important;
+      -webkit-appearance: none;
     }
 
     /* Placeholder gradient — sits behind video, visible only if video fails */
@@ -407,6 +418,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 3/4;
+      background: #FFFFFF;
     }
 
     .carrossel__slide {
@@ -414,7 +426,8 @@
       top: 0; left: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      /* contain: as fotos tem proporcoes diferentes; cover cortava as mais altas */
+      object-fit: contain;
       opacity: 0;
       transition: opacity 0.8s ease;
     }
@@ -462,7 +475,8 @@
     .swipe-carousel__slide {
       flex: 0 0 100%;
       width: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      background: #FFFFFF;
       scroll-snap-align: start;
       aspect-ratio: 3/4;
     }
@@ -1130,7 +1144,9 @@
       Coloque o arquivo hero-bg.mp4 em assets/videos/
       Para mobile, idealmente uma versão menor: hero-bg-mobile.mp4
     -->
-    <video autoplay muted loop playsinline preload="auto">
+    <video id="hero-video" autoplay muted loop playsinline webkit-playsinline
+           preload="metadata" disablepictureinpicture disableremoteplayback
+           tabindex="-1" aria-hidden="true">
       <source src="assets/videos/hero-bg.mp4" type="video/mp4">
     </video>
     <!-- Fallback: gradiente animado caso o vídeo não carregue -->
@@ -1412,7 +1428,7 @@
           } else if (hasVideo && hasImage) {
             // MP4 video plays once, then image appears
             mediaHTML = `
-              <video muted playsinline preload="auto" class="produto-video"
+              <video muted playsinline preload="metadata" class="produto-video"
                 onerror="this.style.display='none';this.nextElementSibling.style.opacity='1';">
                 <source src="${videoUrl}" type="video/mp4"
                   onerror="this.parentElement.style.display='none';this.parentElement.nextElementSibling.style.opacity='1';">
@@ -1420,7 +1436,7 @@
               <img src="${imageUrl}" alt="${p.nome}" loading="lazy" class="produto-img" style="opacity:0;">`;
           } else if (hasVideo) {
             mediaHTML = `
-              <video muted loop playsinline preload="auto" class="produto-video"
+              <video muted loop playsinline preload="metadata" class="produto-video"
                 onerror="this.style.display='none';">
                 <source src="${videoUrl}" type="video/mp4">
               </video>`;
@@ -1513,10 +1529,22 @@
     // GIF DURATION PARSER
     // Reads the GIF binary to sum all frame delays
     // ═══════════════════════════════════════
+    // Conexao fraca ou modo economia: nem vale baixar o GIF de novo
+    function conexaoFraca() {
+      const c = navigator.connection;
+      if (!c) return false;
+      if (c.saveData) return true;
+      return ['slow-2g', '2g', '3g'].includes(c.effectiveType);
+    }
+
     async function getGifDuration(url) {
+      if (conexaoFraca()) return 2500;
       try {
-        const res = await fetch(url);
+        // force-cache: o <img> ja baixou esse GIF, aqui reaproveitamos o cache
+        const res = await fetch(url, { cache: 'force-cache' });
         const buffer = await res.arrayBuffer();
+        // GIF grande demais para varrer na thread principal do celular
+        if (buffer.byteLength > 3 * 1024 * 1024) return 2500;
         const bytes = new Uint8Array(buffer);
         let totalDelay = 0;
         let i = 0;
@@ -1681,6 +1709,61 @@
         goToSlide((currentSlide + 1) % slides.length);
       }, 4000);
     }
+
+    // ═══════════════════════════════════════
+    // FUNDO EM VÍDEO — autoplay garantido
+    // É um fundo, não um player: nunca deve pedir play ao visitante.
+    // ═══════════════════════════════════════
+    (function () {
+      const video = document.getElementById('hero-video');
+      if (!video) return;
+
+      // A propriedade (não só o atributo) é o que libera o autoplay sem gesto
+      video.muted = true;
+      video.defaultMuted = true;
+
+      let tocando = false;
+      let heroVisivel = true;
+
+      function tentarTocar() {
+        // fora do hero o fundo fica parado de proposito — o listener de
+        // scroll abaixo nao pode religa-lo
+        if (!heroVisivel || tocando || video.paused === false) return;
+        const p = video.play();
+        if (p && p.then) {
+          p.then(() => { tocando = true; }).catch(() => { /* tenta de novo depois */ });
+        }
+      }
+
+      // Tenta assim que houver quadro suficiente
+      tentarTocar();
+      video.addEventListener('loadeddata', tentarTocar);
+      video.addEventListener('canplay', tentarTocar);
+
+      // Se o navegador bloquear (economia de dados, bateria fraca),
+      // retoma no primeiro sinal de interação — sem nenhum botão visível.
+      ['touchstart', 'pointerdown', 'scroll', 'keydown'].forEach(ev => {
+        window.addEventListener(ev, tentarTocar, { passive: true });
+      });
+
+      // Voltar de outra aba não pode deixar o fundo congelado
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) tentarTocar();
+      });
+
+      // Fora do hero o vídeo não precisa rodar: economiza bateria e
+      // evita travamento ao rolar até os produtos.
+      const hero = document.getElementById('inicio');
+      if (hero && 'IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            heroVisivel = e.isIntersecting;
+            if (heroVisivel) { tocando = false; tentarTocar(); }
+            else if (!video.paused) { video.pause(); tocando = false; }
+          });
+        }, { threshold: 0.01 }).observe(hero);
+      }
+    })();
 
     // ── Load products on page load ──
     loadProducts();
