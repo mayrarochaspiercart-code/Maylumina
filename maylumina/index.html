@@ -79,7 +79,13 @@
       z-index: 1;
       /* e um fundo, nao um player: nunca recebe toque nem mostra controles */
       pointer-events: none;
+      /* invisivel ate tocar de verdade: se o navegador bloquear o autoplay,
+         aparece o gradiente animado no lugar — nunca um botao de play */
+      opacity: 0;
+      transition: opacity 0.9s ease;
     }
+
+    .video-bg-container video.tocando { opacity: 1; }
 
     .video-bg-container video::-webkit-media-controls,
     .video-bg-container video::-webkit-media-controls-start-playback-button {
@@ -1420,7 +1426,8 @@
           if (hasGif && hasImage) {
             // GIF plays as intro, then crossfades to static image
             mediaHTML = `
-              <img src="${videoUrl}" alt="" class="produto-gif" data-intro="true">
+              <img src="${videoUrl}" alt="" class="produto-gif" data-intro="true"
+                   loading="lazy" decoding="async">
               <img src="${imageUrl}" alt="${p.nome}" loading="lazy" class="produto-img" style="opacity:0;">`;
           } else if (hasVideo && hasImage) {
             // MP4 video plays once, then image appears
@@ -1534,14 +1541,22 @@
       return ['slow-2g', '2g', '3g'].includes(c.effectiveType);
     }
 
+    const GIF_PADRAO = 4000;   // usado quando nao vale a pena medir
+    const GIF_LIMITE  = 1024 * 1024;
+
     async function getGifDuration(url) {
-      if (conexaoFraca()) return 2500;
+      if (conexaoFraca()) return GIF_PADRAO;
       try {
+        // Pergunta o tamanho ANTES de baixar: varrer um GIF grande na thread
+        // principal trava o celular (um GIF de 3 MB vira centenas de MB em RAM)
+        const head = await fetch(url, { method: 'HEAD' });
+        const tam = Number(head.headers.get('content-length') || 0);
+        if (tam > GIF_LIMITE) return GIF_PADRAO;
+
         // force-cache: o <img> ja baixou esse GIF, aqui reaproveitamos o cache
         const res = await fetch(url, { cache: 'force-cache' });
         const buffer = await res.arrayBuffer();
-        // GIF grande demais para varrer na thread principal do celular
-        if (buffer.byteLength > 3 * 1024 * 1024) return 2500;
+        if (buffer.byteLength > GIF_LIMITE) return GIF_PADRAO;
         const bytes = new Uint8Array(buffer);
         let totalDelay = 0;
         let i = 0;
@@ -1599,9 +1614,9 @@
           }
         }
         
-        return totalDelay || 2000; // fallback 2s if parsing fails
+        return totalDelay || GIF_PADRAO;
       } catch (e) {
-        return 2000; // fallback
+        return GIF_PADRAO;
       }
     }
 
@@ -1721,6 +1736,20 @@
 
       let tocando = false;
       let heroVisivel = true;
+
+      // Só revela o fundo quando ha reproducao confirmada.
+      // Rede de seguranca: alguns navegadores nao disparam 'playing' de forma
+      // confiavel, entao tambem conferimos se o tempo esta de fato correndo —
+      // assim o video nunca fica escondido estando tocando.
+      function revelar() { video.classList.add('tocando'); }
+      video.addEventListener('playing', revelar);
+
+      let ultimo = -1;
+      const vigia = setInterval(() => {
+        if (video.classList.contains('tocando')) { clearInterval(vigia); return; }
+        if (!video.paused && video.currentTime > 0 && video.currentTime !== ultimo) revelar();
+        ultimo = video.currentTime;
+      }, 400);
 
       function tentarTocar() {
         // fora do hero o fundo fica parado de proposito — o listener de
