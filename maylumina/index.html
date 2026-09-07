@@ -418,7 +418,6 @@
       position: relative;
       width: 100%;
       aspect-ratio: 3/4;
-      background: #FFFFFF;
     }
 
     .carrossel__slide {
@@ -426,8 +425,7 @@
       top: 0; left: 0;
       width: 100%;
       height: 100%;
-      /* contain: as fotos tem proporcoes diferentes; cover cortava as mais altas */
-      object-fit: contain;
+      object-fit: cover;
       opacity: 0;
       transition: opacity 0.8s ease;
     }
@@ -475,8 +473,7 @@
     .swipe-carousel__slide {
       flex: 0 0 100%;
       width: 100%;
-      object-fit: contain;
-      background: #FFFFFF;
+      object-fit: cover;
       scroll-snap-align: start;
       aspect-ratio: 3/4;
     }
@@ -1145,7 +1142,7 @@
       Para mobile, idealmente uma versão menor: hero-bg-mobile.mp4
     -->
     <video id="hero-video" autoplay muted loop playsinline webkit-playsinline
-           preload="metadata" disablepictureinpicture disableremoteplayback
+           preload="auto" disablepictureinpicture disableremoteplayback
            tabindex="-1" aria-hidden="true">
       <source src="assets/videos/hero-bg.mp4" type="video/mp4">
     </video>
@@ -1428,7 +1425,7 @@
           } else if (hasVideo && hasImage) {
             // MP4 video plays once, then image appears
             mediaHTML = `
-              <video muted playsinline preload="metadata" class="produto-video"
+              <video muted playsinline preload="auto" class="produto-video"
                 onerror="this.style.display='none';this.nextElementSibling.style.opacity='1';">
                 <source src="${videoUrl}" type="video/mp4"
                   onerror="this.parentElement.style.display='none';this.parentElement.nextElementSibling.style.opacity='1';">
@@ -1436,7 +1433,7 @@
               <img src="${imageUrl}" alt="${p.nome}" loading="lazy" class="produto-img" style="opacity:0;">`;
           } else if (hasVideo) {
             mediaHTML = `
-              <video muted loop playsinline preload="metadata" class="produto-video"
+              <video muted loop playsinline preload="auto" class="produto-video"
                 onerror="this.style.display='none';">
                 <source src="${videoUrl}" type="video/mp4">
               </video>`;
