@@ -1751,6 +1751,85 @@
       });
     });
 
+    // ═══════════════════════════════════════
+    // FUNDO EM VÍDEO — autoplay garantido
+    // É um fundo, não um player: nunca deve pedir play ao visitante.
+    // ═══════════════════════════════════════
+    (function () {
+      const video = document.getElementById('hero-video');
+      if (!video) return;
+
+      // A propriedade (não só o atributo) é o que libera o autoplay sem gesto
+      video.muted = true;
+      video.defaultMuted = true;
+
+      let tocando = false;
+      let heroVisivel = true;
+
+      // Só revela o fundo quando ha reproducao confirmada.
+      // Rede de seguranca: alguns navegadores nao disparam 'playing' de forma
+      // confiavel, entao tambem conferimos se o tempo esta de fato correndo —
+      // assim o video nunca fica escondido estando tocando.
+      const cortina = document.querySelector('.video-fallback');
+      function revelar() {
+        video.dataset.revelado = 'true';
+        if (cortina) cortina.classList.add('escondido');
+      }
+      video.addEventListener('playing', revelar);
+
+      let ultimo = -1;
+      const vigia = setInterval(() => {
+        if (video.dataset.revelado) { clearInterval(vigia); return; }
+        if (!video.paused && video.currentTime > 0 && video.currentTime !== ultimo) revelar();
+        ultimo = video.currentTime;
+      }, 400);
+
+      function tentarTocar() {
+        // fora do hero o fundo fica parado de proposito — o listener de
+        // scroll abaixo nao pode religa-lo
+        if (!heroVisivel || tocando || video.paused === false) return;
+        const p = video.play();
+        if (p && p.then) {
+          p.then(() => { tocando = true; }).catch(() => { /* tenta de novo depois */ });
+        }
+      }
+
+      // Tenta assim que houver quadro suficiente
+      tentarTocar();
+      video.addEventListener('loadeddata', tentarTocar);
+      video.addEventListener('canplay', tentarTocar);
+
+      // Se o navegador bloquear (economia de dados, bateria fraca),
+      // retoma no primeiro sinal de interação — sem nenhum botão visível.
+      ['touchstart', 'pointerdown', 'scroll', 'keydown'].forEach(ev => {
+        window.addEventListener(ev, tentarTocar, { passive: true });
+      });
+
+      // Voltar de outra aba não pode deixar o fundo congelado
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) tentarTocar();
+      });
+
+      // Ultima linha de defesa: com quadro disponivel, revela mesmo que os
+      // eventos falhem. O video jamais deve ficar preso atras da cortina.
+      setTimeout(() => {
+        if (!video.dataset.revelado && video.readyState >= 2) revelar();
+      }, 6000);
+
+      // Fora do hero o vídeo não precisa rodar: economiza bateria e
+      // evita travamento ao rolar até os produtos.
+      const hero = document.getElementById('inicio');
+      if (hero && 'IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            heroVisivel = e.isIntersecting;
+            if (heroVisivel) { tocando = false; tentarTocar(); }
+            else if (!video.paused) { video.pause(); tocando = false; }
+          });
+        }, { threshold: 0.01 }).observe(hero);
+      }
+    })();
+
     // ── Load products on page load ──
     loadProducts();
   </script>
