@@ -516,29 +516,32 @@
 
     .section-label {
       font-family: var(--font-body);
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 600;
-      letter-spacing: 0.3em;
+      letter-spacing: 0.4em;
       text-transform: uppercase;
       color: var(--pink-tinta);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.6rem;
     }
 
     .section-title {
       font-family: var(--font-display);
-      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-size: clamp(2.9rem, 6.4vw, 5rem);
       font-weight: 400;
-      line-height: 1.15;
-      letter-spacing: -0.01em;
+      line-height: 0.97;
+      letter-spacing: -0.025em;
+      hyphens: none;
+      overflow-wrap: normal;
       color: var(--pink-tinta);
-      margin-bottom: 2rem;
+      margin-bottom: 2.2rem;
     }
 
     /* Título monumental para as faixas coloridas */
     .section-title--display {
-      font-size: clamp(2.6rem, 7vw, 5rem);
+      font-size: clamp(3.4rem, 9.5vw, 7.5rem);
+      line-height: 0.88;
       text-transform: uppercase;
-      letter-spacing: 0.01em;
+      letter-spacing: -0.015em;
       color: var(--texto);
       text-shadow: 0 2px 20px rgba(255, 255, 255, 0.5);
     }
@@ -939,7 +942,11 @@
       }
 
       .section-title {
-        font-size: clamp(1.6rem, 5vw, 2.2rem);
+        font-size: clamp(2.5rem, 8vw, 3.6rem);
+      }
+
+      .section-title--display {
+        font-size: clamp(3rem, 11vw, 4.6rem);
       }
 
       .section-text {
@@ -1035,8 +1042,12 @@
       }
 
       .section-title {
-        font-size: clamp(1.4rem, 6vw, 1.8rem);
-        margin-bottom: 1.2rem;
+        font-size: clamp(2.2rem, 11vw, 3rem);
+        margin-bottom: 1.3rem;
+      }
+
+      .section-title--display {
+        font-size: clamp(2.6rem, 14vw, 3.8rem);
       }
 
       .section-title br {
@@ -1212,7 +1223,7 @@
         <div class="split">
           <div>
             <p class="section-label reveal">Bem-vindos</p>
-            <h2 class="section-title reveal">Sejam bem-vindos<br>ao meu site!</h2>
+            <h2 class="section-title reveal">Sejam<br><span style="white-space:nowrap">bem-vindos</span><br>ao meu site!</h2>
             <p class="section-text reveal">
               Oi, meus amores! Aqui vocês vão conhecer a história da MayLumina, minhas criações, conteúdos sobre beleza, autocuidado, arte e muito mais. ✨ Explore o site e venha conferir tudo o que preparei para vocês!
             </p>
@@ -1286,7 +1297,7 @@
       <div class="section-inner">
         <div class="historia reveal" style="max-width:700px;margin:0 auto;">
           <p class="section-label" style="text-align:center;">A história</p>
-          <h2 class="section-title" style="text-align:center;font-style:italic;">Entre Sussurros de Luz ✨</h2>
+          <h2 class="section-title" style="text-align:center;font-style:italic;">Entre Sussurros<br>de Luz ✨</h2>
 
           <p class="section-text" style="margin-bottom:1.4rem;">Antes de existir a MayLumina, existia apenas uma luz dentro de mim. Uma luz que outras pessoas percebiam antes mesmo que eu pudesse entendê-la. Muitas vezes, ouvi que carregava algo diferente, uma luz forte, uma energia que fazia parte de quem eu sou.</p>
 
@@ -1318,7 +1329,7 @@
         <div class="split split--inverso">
           <div>
             <p class="section-label reveal">Quem sou eu</p>
-            <h2 class="section-title reveal">E essa é a história<br>da MayLumina… ✨</h2>
+            <h2 class="section-title reveal">E essa é<br>a história da<br>MayLumina… ✨</h2>
             <p class="section-text reveal">
               Agora, que tal me conhecer um pouquinho? 💗
             </p>
