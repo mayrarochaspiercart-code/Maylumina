@@ -31,9 +31,9 @@
 
       /* Tinta — usado em TEXTO. Pastel nao tem contraste para ler,
          entao o texto usa a versao profunda do mesmo matiz. */
-      --pink-tinta:  #A0446F;
+      --pink-tinta:  #903861;
       --texto:       #4A3B42;
-      --texto-light: #75636B;
+      --texto-light: #605057;
       --glass-bg:    rgba(242, 234, 224, 0.82);
       --glass-border: rgba(255, 255, 255, 0.4);
       --blur:        blur(16px);
@@ -242,13 +242,29 @@
     /* ═══════════════════════════════════════
        FUNDOS DAS SEÇÕES (mesmas cores do hero)
     ═══════════════════════════════════════ */
-    .ground-creme { background: var(--creme); }
+    .ground-creme {
+      background-color: var(--creme);
+      background-image: linear-gradient(135deg,
+        rgba(244, 194, 218, 0.30) 0%,
+        rgba(249, 213, 180, 0.28) 27%,
+        rgba(179, 228, 216, 0.30) 54%,
+        rgba(211, 188, 227, 0.28) 79%,
+        rgba(244, 194, 218, 0.30) 100%);
+      background-size: 320% 320%;
+      animation: gradientFlow 22s ease infinite;
+    }
 
-    /* Creme levemente rosado — tinta do pink da marca sobre o creme */
+    /* Mesma base, com o rosa mais presente */
     .ground-rosa {
-      background:
-        linear-gradient(rgba(233, 30, 140, 0.06), rgba(233, 30, 140, 0.06)),
-        var(--creme);
+      background-color: var(--creme);
+      background-image: linear-gradient(135deg,
+        rgba(244, 194, 218, 0.52) 0%,
+        rgba(211, 188, 227, 0.42) 30%,
+        rgba(244, 194, 218, 0.52) 55%,
+        rgba(249, 213, 180, 0.44) 80%,
+        rgba(244, 194, 218, 0.52) 100%);
+      background-size: 320% 320%;
+      animation: gradientFlow 26s ease infinite;
     }
 
     /* Faixa camaleão — a assinatura colorida da marca, agora pontual */
@@ -277,7 +293,10 @@
     .split__frame {
       position: absolute;
       inset: 2rem 2rem -2rem -2rem;
-      background: var(--pink);
+      background: linear-gradient(135deg,
+        var(--pink), var(--laranja), var(--roxo), var(--turquesa), var(--pink));
+      background-size: 300% 300%;
+      animation: gradientFlow 20s ease infinite;
     }
 
     .split--inverso .split__frame { inset: 2rem -2rem -2rem 2rem; }
@@ -295,7 +314,10 @@
        MARQUEE — faixa rolante
     ═══════════════════════════════════════ */
     .marquee {
-      background: var(--pink);
+      background: linear-gradient(90deg,
+        var(--pink), var(--roxo), var(--turquesa), var(--laranja), var(--pink));
+      background-size: 400% 100%;
+      animation: gradientFlow 18s linear infinite;
       overflow: hidden;
       padding: 1rem 0;
     }
