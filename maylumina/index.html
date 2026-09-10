@@ -123,7 +123,7 @@
         <div class="spread__texto">
           <p class="olho entra">A origem</p>
           <h2 id="titulo-origem" class="manchete entra entra-1" style="margin-bottom:2rem">
-            A luz vem de Deus.<br>O brilho se revela<br>em <em>você.</em>
+            A luz vem de Deus. <br>O brilho se revela <br>em <em>você.</em>
           </h2>
         </div>
 
@@ -178,7 +178,7 @@
       </div>
 
       <h2 id="titulo-edicoes" class="manchete entra entra-1" style="margin-bottom:1.2rem">
-        Uma mulher tem muitas versões.<br>Seu autocuidado <em>também.</em>
+        Uma mulher tem muitas versões. <br>Seu autocuidado <em>também.</em>
       </h2>
       <p class="deck entra entra-2" style="max-width:46ch; margin-bottom:var(--respiro)">
         Cada edição é um mundo dentro do mesmo universo. Escolha por onde entrar.
@@ -307,8 +307,11 @@
     const manchete = document.createElement('h3');
     manchete.className = 'capa__manchete';
     ed.manchete.forEach((linha, k) => {
-      manchete.appendChild(document.createTextNode(linha));
-      if (k < ed.manchete.length - 1) manchete.appendChild(document.createElement('br'));
+      const ultima = k === ed.manchete.length - 1;
+      // O espaco vai ANTES do <br>: sem ele o textContent cola as palavras
+      // ("Autocuidadotambem e arte") para leitor de tela e crawler.
+      manchete.appendChild(document.createTextNode(ultima ? linha : linha + ' '));
+      if (!ultima) manchete.appendChild(document.createElement('br'));
     });
 
     const base = document.createElement('div');
