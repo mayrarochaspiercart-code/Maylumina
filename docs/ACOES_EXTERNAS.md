@@ -20,7 +20,8 @@ viu": é uma senha que esteve aberta.
 
 ## 2. 🔴 URGENTE — aplicar a migration do Supabase
 
-Arquivo: **`docs/supabase/001-auth-e-rls.sql`**
+Arquivo: **`docs/supabase/001-auth-e-rls.sql`** (versão 2 — a versão 1 tinha
+buracos, ver o fim do arquivo)
 
 Enquanto ela não for aplicada, o banco continua exatamente como foi
 encontrado (verificado por sondagem, sem alterar nenhum dado):
@@ -28,28 +29,77 @@ encontrado (verificado por sondagem, sem alterar nenhum dado):
 | Alguém sem login consegue… | Hoje |
 |---|---|
 | ler a senha do painel | **sim** |
-| criar produto | **sim** |
-| editar produto | **sim** |
-| apagar produto | **sim** |
+| criar / editar / apagar produto | **sim** |
 | ler os pedidos dos clientes | **sim** |
-| alterar pedidos | **sim** |
+| alterar ou apagar pedidos | **sim** |
+| ler pedido_itens | **sim** |
 
-Como aplicar: Supabase Dashboard → **SQL Editor** → colar o arquivo inteiro
-→ Run. Depois seguir a seção **6** que está no fim do próprio arquivo:
+E, como o cadastro público está aberto, qualquer pessoa que criasse uma
+conta poderia **apagar as tabelas inteiras com um comando** — `TRUNCATE`
+não passa por Row Level Security. Isso foi reproduzido em ensaio.
 
-1. criar o usuário da May em *Authentication → Users* com uma **senha nova**;
-2. registrar esse usuário na tabela `admins` (o SQL está lá);
-3. desligar *Enable email signups* em *Authentication → Providers → Email*
-   (hoje qualquer pessoa pode criar conta no projeto);
-4. rodar os quatro `curl` de conferência — os três primeiros têm que passar
-   a falhar, e a vitrine tem que continuar respondendo 200;
-5. entrar em `/admin` com o e-mail e a senha novos e confirmar que criar,
-   editar e apagar produto continuam funcionando.
+### 2.1 Onde clicar, exatamente
 
-**Enquanto os passos 1 a 5 não estiverem feitos, o painel não está seguro.**
-O `/admin` já não guarda mais senha nenhuma e já usa login de verdade, mas
-quem decide o que pode ser lido e escrito é o banco — e o banco ainda não
-recebeu as regras.
+1. Abrir **https://supabase.com/dashboard** e entrar na conta.
+2. Escolher o projeto **`rkwlumnrlzmusdccwvxd`** (é o que o site usa).
+3. No menu da esquerda, clicar em **SQL Editor**.
+4. Clicar em **+ New query**.
+5. Abrir o arquivo `docs/supabase/001-auth-e-rls.sql` deste repositório,
+   **selecionar tudo, copiar e colar** na janela do SQL Editor.
+6. Clicar em **Run** (ou Ctrl+Enter).
+
+O arquivo é uma transação só: ou entra inteiro, ou não entra nada. Ele
+**não apaga nenhuma linha** de produto ou pedido. A única coisa que ele
+destrói de propósito é a coluna `admin_config.senha_hash`, e isso é
+irreversível.
+
+### 2.2 O que tem de aparecer
+
+No fim da execução o próprio arquivo roda seis conferências. O esperado:
+
+- `rls_ligado` = **true** nas cinco tabelas;
+- exatamente **7 policies**, nenhuma a mais;
+- a busca por `senha_hash` volta **0 linhas**;
+- contagens: **produtos = 2**, pedidos = 0, pedido_itens = 0,
+  admin_config = 1 (a linha continua, só a coluna sumiu);
+- `admins_registrados` = **0** — é o passo 2.3 que resolve;
+- nenhuma linha com `TRUNCATE`/`TRIGGER`/`REFERENCES`.
+
+Se a contagem de produtos vier diferente de 2, **pare e me chame**.
+
+### 2.3 Criar o administrador de verdade
+
+Enquanto `public.admins` estiver vazia, **ninguém administra o site — nem
+você**. Os dados ficam intactos, mas o painel não deixa salvar nada.
+
+1. Menu da esquerda → **Authentication** → **Users** → **Add user** →
+   *Create new user*.
+2. Preencher o e-mail que você quiser usar e uma **senha nova**. Marcar
+   **Auto Confirm User**.
+   A senha antiga esteve publicamente legível: não serve nem aqui nem em
+   lugar nenhum.
+3. Voltar ao **SQL Editor** e rodar, trocando o e-mail:
+
+   ```sql
+   insert into public.admins (user_id)
+   select id from auth.users where email = 'SEU_EMAIL_AQUI'
+   on conflict (user_id) do nothing;
+
+   select count(*) from public.admins;   -- tem de voltar 1
+   ```
+
+4. Menu da esquerda → **Authentication** → **Providers** → **Email** →
+   desligar **Enable email signups** → **Save**.
+
+### 2.4 Conferir e me avisar
+
+Depois disso, me diga que aplicou. Eu rodo os testes de autorização ao
+vivo contra o banco real, com a chave anon pública, e te devolvo a matriz
+final. Os comandos de conferência também estão na seção 8.4 do próprio
+arquivo `.sql`, se você quiser rodar antes.
+
+Só depois desses testes passarem é que dá para dizer que o painel está
+seguro.
 
 ---
 
