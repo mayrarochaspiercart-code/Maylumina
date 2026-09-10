@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Maylumina — Painel Admin</title>
   <meta name="robots" content="noindex, nofollow">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/fontes.css">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -438,9 +437,10 @@
     <div class="login-box">
       <h1>Maylumina</h1>
       <p>Painel administrativo</p>
-      <input type="password" id="loginPassword" placeholder="Senha" autofocus>
-      <p class="login-error" id="loginError">Senha incorreta</p>
-      <button class="btn btn-primary btn-full" onclick="doLogin()">Entrar</button>
+      <input type="email" id="loginEmail" placeholder="E-mail" autocomplete="username" autofocus>
+      <input type="password" id="loginPassword" placeholder="Senha" autocomplete="current-password">
+      <p class="login-error" id="loginError">E-mail ou senha incorretos.</p>
+      <button class="btn btn-primary btn-full" id="loginBotao" onclick="doLogin()">Entrar</button>
     </div>
   </div>
 
@@ -555,15 +555,94 @@
   <script>
     // ═══════════════════════════════════════
     // SUPABASE CONFIG
+    // A chave anon é pública por definição — ela identifica o projeto, não
+    // autoriza nada. Toda autorização é decidida no banco, por RLS, a partir
+    // do usuário autenticado (ver docs/supabase/001-auth-e-rls.sql).
     // ═══════════════════════════════════════
     const SUPABASE_URL = 'https://rkwlumnrlzmusdccwvxd.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrd2x1bW5ybHptdXNkY2N3dnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxMzEyMDMsImV4cCI6MjA5ODcwNzIwM30.k4n-WiEwXCENCX0ItiZoH-Z1BwYy1429AM8GYOv6_MM';
 
+    // ═══════════════════════════════════════
+    // SESSÃO (Supabase Auth)
+    // O que autoriza uma escrita é o access token deste usuário, não um
+    // booleano guardado no navegador. Se o token não valer, o banco recusa.
+    // ═══════════════════════════════════════
+    const CHAVE_SESSAO = 'ml_sessao';
+    let sessao = null;
+
+    function lerSessao() {
+      try {
+        const bruto = sessionStorage.getItem(CHAVE_SESSAO);
+        return bruto ? JSON.parse(bruto) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function gravarSessao(s) {
+      sessao = s;
+      if (s) sessionStorage.setItem(CHAVE_SESSAO, JSON.stringify(s));
+      else sessionStorage.removeItem(CHAVE_SESSAO);
+    }
+
+    async function authFetch(rota, corpo) {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/${rota}`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(corpo)
+      });
+      const texto = await res.text();
+      const dados = texto ? JSON.parse(texto) : null;
+      if (!res.ok) {
+        const erro = new Error((dados && (dados.error_description || dados.msg || dados.message)) || 'Falha de autenticação');
+        erro.status = res.status;
+        throw erro;
+      }
+      return dados;
+    }
+
+    function guardarToken(dados) {
+      gravarSessao({
+        access_token: dados.access_token,
+        refresh_token: dados.refresh_token,
+        expira_em: Date.now() + ((dados.expires_in || 3600) * 1000) - 60000,
+        email: dados.user && dados.user.email
+      });
+    }
+
+    async function renovarSessao() {
+      const atual = sessao || lerSessao();
+      if (!atual || !atual.refresh_token) return false;
+      try {
+        const dados = await authFetch('token?grant_type=refresh_token', { refresh_token: atual.refresh_token });
+        guardarToken(dados);
+        return true;
+      } catch (e) {
+        gravarSessao(null);
+        return false;
+      }
+    }
+
+    async function tokenValido() {
+      const atual = sessao || lerSessao();
+      if (!atual) return null;
+      sessao = atual;
+      if (Date.now() >= atual.expira_em) {
+        const ok = await renovarSessao();
+        if (!ok) return null;
+      }
+      return sessao.access_token;
+    }
+
+    // ═══════════════════════════════════════
+    // SUPABASE REST
+    // ═══════════════════════════════════════
     async function supaFetch(endpoint, options = {}) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+      const token = await tokenValido();
+      const enviar = async (bearer) => fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
         headers: {
           'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Authorization': `Bearer ${bearer}`,
           'Content-Type': 'application/json',
           'Prefer': options.prefer || 'return=representation',
           ...options.headers
@@ -571,54 +650,105 @@
         method: options.method || 'GET',
         body: options.body ? JSON.stringify(options.body) : undefined
       });
+
+      let res = await enviar(token || SUPABASE_KEY);
+
+      // Token expirado no meio do caminho: uma tentativa de renovar, e só.
+      if (res.status === 401 && token) {
+        const ok = await renovarSessao();
+        if (ok) res = await enviar(sessao.access_token);
+      }
+
+      if (res.status === 401 || res.status === 403) {
+        if (token) encerrarSessao('Sua sessão expirou ou este usuário não tem permissão.');
+        const err = new Error('Não autorizado');
+        err.status = res.status;
+        throw err;
+      }
+
       if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err);
+        const texto = await res.text();
+        throw new Error(texto);
       }
-      const text = await res.text();
-      return text ? JSON.parse(text) : null;
+      const texto = await res.text();
+      return texto ? JSON.parse(texto) : null;
     }
 
     // ═══════════════════════════════════════
-    // AUTH (simples, senha no banco)
+    // LOGIN / LOGOUT
     // ═══════════════════════════════════════
-    let isLoggedIn = false;
-
-    async function doLogin() {
-      const pwd = document.getElementById('loginPassword').value;
-      try {
-        const data = await supaFetch('admin_config?id=eq.1&select=senha_hash');
-        if (data && data.length > 0 && data[0].senha_hash === pwd) {
-          isLoggedIn = true;
-          sessionStorage.setItem('ml_admin', 'true');
-          document.getElementById('loginOverlay').classList.add('hidden');
-          document.getElementById('adminContainer').classList.add('active');
-          loadProducts();
-        } else {
-          document.getElementById('loginError').style.display = 'block';
-        }
-      } catch (e) {
-        document.getElementById('loginError').textContent = 'Erro de conexão';
-        document.getElementById('loginError').style.display = 'block';
-      }
+    function mostrarErroLogin(mensagem) {
+      const alvo = document.getElementById('loginError');
+      alvo.textContent = mensagem;
+      alvo.style.display = 'block';
     }
 
-    function doLogout() {
-      sessionStorage.removeItem('ml_admin');
+    function abrirPainel() {
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('adminContainer').classList.add('active');
+      loadProducts();
+    }
+
+    function encerrarSessao(mensagem) {
+      gravarSessao(null);
+      if (mensagem) sessionStorage.setItem('ml_aviso', mensagem);
       location.reload();
     }
 
-    // Auto-login if session exists
-    if (sessionStorage.getItem('ml_admin')) {
-      document.getElementById('loginOverlay').classList.add('hidden');
-      document.getElementById('adminContainer').classList.add('active');
-      isLoggedIn = true;
-      document.addEventListener('DOMContentLoaded', loadProducts);
+    async function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pwd = document.getElementById('loginPassword').value;
+      const botao = document.getElementById('loginBotao');
+      document.getElementById('loginError').style.display = 'none';
+
+      if (!email || !pwd) {
+        mostrarErroLogin('Preencha e-mail e senha.');
+        return;
+      }
+
+      botao.disabled = true;
+      botao.textContent = 'Entrando…';
+      try {
+        const dados = await authFetch('token?grant_type=password', { email, password: pwd });
+        guardarToken(dados);
+        abrirPainel();
+      } catch (e) {
+        gravarSessao(null);
+        mostrarErroLogin(e.status ? 'E-mail ou senha incorretos.' : 'Erro de conexão.');
+      } finally {
+        botao.disabled = false;
+        botao.textContent = 'Entrar';
+      }
     }
 
-    // Enter key on password
-    document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') doLogin();
+    async function doLogout() {
+      const token = sessao && sessao.access_token;
+      if (token) {
+        try {
+          await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` }
+          });
+        } catch (e) { /* o token some daqui de qualquer forma */ }
+      }
+      encerrarSessao();
+    }
+
+    // Retoma a sessão desta aba, se ainda houver uma válida.
+    document.addEventListener('DOMContentLoaded', async () => {
+      const aviso = sessionStorage.getItem('ml_aviso');
+      if (aviso) {
+        sessionStorage.removeItem('ml_aviso');
+        mostrarErroLogin(aviso);
+      }
+      if (await tokenValido()) abrirPainel();
+    });
+
+    // Enter em qualquer campo do login
+    ['loginEmail', 'loginPassword'].forEach((id) => {
+      document.getElementById(id).addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') doLogin();
+      });
     });
 
     // ═══════════════════════════════════════
@@ -827,8 +957,6 @@
       setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    // Initial load
-    if (isLoggedIn) loadProducts();
   </script>
 </body>
 </html>

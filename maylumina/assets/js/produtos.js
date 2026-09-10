@@ -335,9 +335,19 @@ function criarGaveta() {
 }
 
 /* ── Carga ───────────────────────────────────────────────────────── */
-export async function carregarProdutos({ alvo, categoria }) {
+/*
+ * `secao` é opcional e resolve o caso da edição que ainda não tem produto:
+ * em vez de anunciar "em breve", a seção inteira sai da página e do leitor
+ * de tela. A edição fica completa com zero produto — o que ela promete é o
+ * que ela entrega. Se a seção vier com o atributo `hidden` no HTML, ela só
+ * aparece quando houver produto de verdade, e não pisca no caminho.
+ */
+export async function carregarProdutos({ alvo, categoria, secao }) {
   const grade = typeof alvo === 'string' ? document.querySelector(alvo) : alvo;
   if (!grade) return;
+
+  const bloco = typeof secao === 'string' ? document.querySelector(secao) : secao;
+  const mostrarSecao = () => { if (bloco) bloco.hidden = false; };
 
   const abrirGaveta = criarGaveta();
   esqueleto(grade);
@@ -356,20 +366,36 @@ export async function carregarProdutos({ alvo, categoria }) {
     if (!resposta.ok) throw new Error(`Supabase respondeu ${resposta.status}`);
     produtos = await resposta.json();
   } catch (erro) {
+    // Falha de rede não é ausência de produto: a seção aparece com o convite
+    // a tentar de novo.
+    mostrarSecao();
     estado(
       grade,
       'Não foi possível carregar',
       'Os produtos não vieram agora. Pode ser a conexão.',
-      { rotulo: 'Tentar de novo', aoClicar: () => carregarProdutos({ alvo: grade, categoria }) }
+      { rotulo: 'Tentar de novo', aoClicar: () => carregarProdutos({ alvo: grade, categoria, secao: bloco }) }
     );
     return;
   }
 
   if (!Array.isArray(produtos) || !produtos.length) {
+    if (bloco) {
+      bloco.hidden = true;
+      grade.replaceChildren();
+      // Um link de navegação que aponta para uma seção que não existe é um
+      // beco sem saída. Ele sai junto.
+      if (bloco.id) {
+        document
+          .querySelectorAll(`a[href="#${bloco.id}"]`)
+          .forEach((link) => { link.hidden = true; });
+      }
+      return;
+    }
     estado(grade, 'Em breve', 'Esta edição ainda está sendo preparada.');
     return;
   }
 
+  mostrarSecao();
   grade.replaceChildren();
   produtos.forEach((p, i) => {
     const card = montarCard(p, abrirGaveta);

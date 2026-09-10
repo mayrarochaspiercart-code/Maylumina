@@ -22,9 +22,9 @@ LUZ UNA → REFRAÇÃO → CORES → MATÉRIA → EXPRESSÃO → CUIDADO
 ```
 
 Consequência estrutural direta: **a Home não tem fotografia no masthead.**
-Ali a luz ainda é una — ela só se refrata ao entrar numa edição. O vídeo da
-banheira, que antes abria o site inteiro, passou a ser a capa em movimento da
-Edição 01, onde a luz já virou água, pigmento e matéria.
+Ali a luz ainda é una — ela só se refrata ao entrar numa edição. A cena da
+banheira, que antes abria o site inteiro, passou a ser a capa da Edição 01,
+onde a luz já virou água, pigmento e matéria.
 
 ---
 
@@ -78,6 +78,11 @@ Duas famílias, preservadas do projeto original:
 
 Nenhuma terceira fonte. Não havia justificativa conceitual superior à identidade
 existente.
+
+As duas famílias são **hospedadas no próprio projeto**
+(`assets/fonts/*.woff2`, `@font-face` em `assets/css/fontes.css`), apenas nos
+subconjuntos latin e latin-ext. Nenhuma requisição sai para terceiros: o
+caminho crítico não depende do Google e o IP do visitante não vai junto.
 
 ### Escala fluida
 
@@ -143,6 +148,17 @@ Uma curva só, para a marca ter um "andar" reconhecível:
 | `.iridescente` | borda que acende no hover/focus das capas |
 | `.linha-mascara` | manchete que sobe linha a linha, como página composta |
 
+### Sem JavaScript
+
+Tudo que esconde conteúdo à espera de animação (`.entra`, `.linha-mascara`,
+`.fio-luz`) está escopado em **`.js`** — classe que o próprio JavaScript
+escreve no `<html>` antes da primeira pintura. Sem JavaScript nada fica
+escondido: a página não se move, mas está inteira, com links reais e texto
+legível.
+
+Consequência prática: **nunca** escrever uma regra que esconde conteúdo sem
+prefixá-la com `.js`.
+
 ### Movimento reduzido
 
 `prefers-reduced-motion` **não remove tudo** — entrega uma experiência boa
@@ -171,11 +187,29 @@ Uma edição é um mundo dentro do universo. O modelo vive em
 **Adicionar a Edição 03:**
 
 1. Acrescentar um objeto em `EDICOES`.
-2. Criar `edicao/<slug>/index.html` (copiar a estrutura de uma existente).
-3. Acrescentar a URL em `sitemap.xml`.
+2. Rodar `node tools/gerar-capas.mjs` — reescreve as capas e a ficha da banca
+   dentro de `index.html`.
+3. Rodar `node tools/gerar-og.mjs` — desenha o cartão de compartilhamento
+   1200×630 da edição nova.
+4. Criar `edicao/<slug>/index.html` (copiar a estrutura de uma existente).
+5. Acrescentar a URL em `sitemap.xml`.
 
-A Home gera as capas a partir do modelo — **nenhuma marcação é duplicada**.
+O modelo continua sendo a fonte da verdade — **nenhuma marcação é escrita
+duas vezes à mão**. O que mudou é *quando* a marcação nasce: antes ela era
+montada pelo JavaScript no navegador, o que deixava a banca inteira invisível
+para quem chega sem JS e para um robô de busca que não executa script. Agora
+o gerador escreve as capas no HTML, entre `CAPAS:INICIO` e `CAPAS:FIM`, e o
+resultado é versionado. Não há build no deploy.
+
 `proximaEdicao()` fecha o ciclo: nenhuma edição termina em beco sem saída.
+
+**Edição sem produto.** `carregarProdutos({ alvo, categoria, secao })`: se a
+categoria não devolver nenhum produto, a seção inteira sai da página e do
+leitor de tela, junto com qualquer link de navegação que apontasse para ela.
+A edição fica **completa com zero produto** — ela não promete "em breve" o
+que não tem. A seção da Edição 02 nasce com `hidden` no HTML justamente para
+não piscar antes de sumir; assim que o primeiro produto de maquiagem for
+cadastrado no Supabase, ela aparece sozinha.
 
 Produtos são roteados por `categoriaProduto`, que casa com a coluna
 `categoria` da tabela `produtos` no Supabase.
@@ -193,6 +227,7 @@ Produtos são roteados por `categoriaProduto`, que casa com a coluna
 | `.trio` | grade de 3 no desktop, esteira deslizável no celular |
 | `.presa` | mídia fixa, texto rolando ao lado |
 | `.tipo-spread` | spread dirigido por tipografia, quando não há fotografia |
+| `.placa` | pigmento no lugar da fotografia que ainda não existe |
 
 ### Cards de produto
 
@@ -235,3 +270,36 @@ Regras invioláveis:
 - Todo `img` com `width`/`height` — zero salto de layout.
 - Modais: foco entra, fica preso, Escape fecha, foco volta, body travado.
 - Vídeo de fundo com `pointer-events: none` — é fundo, não player.
+
+---
+
+## 10. Segurança do painel
+
+O `/admin` autentica pelo **Supabase Auth** (`signInWithPassword`), e o que
+autoriza cada escrita é o *access token* daquele usuário — não um booleano
+guardado no navegador. A chave anon continua pública, porque é o que ela é:
+identifica o projeto, não autoriza nada.
+
+Quem pode o quê é decidido **no banco**, por Row Level Security. A migration
+está em `docs/supabase/001-auth-e-rls.sql` e precisa ser aplicada à mão no
+Dashboard do Supabase — o navegador não tem, e não deve ter, permissão para
+isso.
+
+Regra que não se negocia: **nenhuma senha, hash ou segredo administrativo
+pode ser devolvido por uma consulta anônima.** Se um dia alguém precisar
+guardar configuração sensível, ela não mora numa tabela lida pela chave anon.
+
+---
+
+## 11. O que é publicado
+
+A raiz publicada na Vercel é `maylumina/`. Fora dela, e portanto fora da
+internet, ficam:
+
+- `docs/` — documentação interna, incluindo a migration de SQL;
+- `tools/` — geradores de capa e de cartão de compartilhamento;
+- `fora-de-producao/` — material que não pode ser servido, como o vídeo com
+  a marca d'água da KlingAI.
+
+Antes de mover um arquivo para dentro de `maylumina/`, vale a pergunta: *eu
+publicaria isto numa URL pública?*

@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Marca que o JavaScript está vivo ANTES da primeira pintura. Só o que
+       estiver sob `.js` pode se esconder à espera de animação; sem JS a
+       página aparece inteira. -->
+  <script>document.documentElement.classList.add('js');</script>
 <title>MayLumina — Sua luz também tem cor</title>
 <meta name="description" content="MayLumina é uma publicação viva sobre as diferentes cores do autocuidado. Art body care, maquiagem e rituais artesanais criados por May Rocha.">
 <link rel="canonical" href="https://maylumina.vercel.app/">
@@ -15,21 +19,27 @@
 <meta property="og:title" content="MayLumina — Sua luz também tem cor">
 <meta property="og:description" content="Uma publicação viva sobre as diferentes cores do autocuidado. Art body care, maquiagem e rituais artesanais.">
 <meta property="og:url" content="https://maylumina.vercel.app/">
-<meta property="og:image" content="https://maylumina.vercel.app/assets/images/foto3.jpeg">
-<meta property="og:image:alt" content="May imersa em uma banheira de água tingida de rosa e azul, segurando uma rosa multicolorida.">
+<meta property="og:image" content="https://maylumina.vercel.app/assets/og/og-home.jpg">
+<meta property="og:image:alt" content="Cartão MayLumina: &quot;Sua luz também tem cor.&quot; sobre um campo de luz em laranja, rosa e turquesa.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="MayLumina — Sua luz também tem cor">
 <meta name="twitter:description" content="Uma publicação viva sobre as diferentes cores do autocuidado.">
-<meta name="twitter:image" content="https://maylumina.vercel.app/assets/images/foto3.jpeg">
+<meta name="twitter:image" content="https://maylumina.vercel.app/assets/og/og-home.jpg">
+<meta name="twitter:image:alt" content="Cartão MayLumina: &quot;Sua luz também tem cor.&quot; sobre um campo de luz em laranja, rosa e turquesa.">
 
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/favicon.svg">
 <link rel="manifest" href="/site.webmanifest">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Quicksand:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Quicksand:wght@400;600;700&display=swap">
+<!-- Tipografia hospedada no próprio projeto: sem terceiro no caminho
+     crítico e sem entregar o IP do visitante ao Google. Ver
+     assets/css/fontes.css. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/cormorant-garamond-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/quicksand-latin.woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/fontes.css">
 <link rel="stylesheet" href="/assets/css/maylumina.css">
 
 <script type="application/ld+json">
@@ -172,9 +182,11 @@
   <section class="folha" id="edicoes" aria-labelledby="titulo-edicoes">
     <div class="limite">
       <div class="ficha entra" style="margin-bottom:1.4rem">
-        <span>As edições</span>
+        <span>Edições</span>
         <span class="ficha__risco" aria-hidden="true"></span>
-        <span id="contagem-edicoes">02 publicadas</span>
+        <span id="contagem-edicoes">01 – 02</span>
+        <span class="ficha__risco" aria-hidden="true"></span>
+        <span>Em circulação</span>
       </div>
 
       <h2 id="titulo-edicoes" class="manchete entra entra-1" style="margin-bottom:1.2rem">
@@ -184,7 +196,64 @@
         Cada edição é um mundo dentro do mesmo universo. Escolha por onde entrar.
       </p>
 
-      <div class="banca" id="banca"></div>
+      <div class="banca" id="banca">
+        <!-- CAPAS:INICIO — gerado por tools/gerar-capas.mjs a partir de
+             assets/js/edicoes.js. Não editar à mão: mexa em EDICOES e rode
+             `node tools/gerar-capas.mjs`. As capas ficam aqui, no HTML
+             inicial, para serem indexáveis e navegáveis sem JavaScript. -->
+
+        <a class="capa iridescente entra entra-1"
+           style="--capa-cor-a:rgba(233, 30, 140, 0.20)"
+           href="/edicao/art-body-care/"
+           data-capa
+           aria-label="Abrir edição 01: Autocuidado também é arte.">
+          <div class="capa__foto">
+            <img src="/assets/images/foto3.jpeg" alt="May imersa em uma banheira de água leitosa tingida de rosa, laranja e azul, segurando uma rosa de pétalas multicoloridas."
+                 width="974" height="1280"
+                 loading="eager" decoding="async" fetchpriority="high">
+          </div>
+          <div class="capa__luz" aria-hidden="true"></div>
+          <div class="capa__grade">
+            <div class="capa__topo">
+              <span class="capa__marca">MayLumina</span>
+              <span>Edição 01</span>
+            </div>
+            <h3 class="capa__manchete">Autocuidado <br>também é <br>arte.</h3>
+            <div class="capa__base">
+              <p class="capa__deck">Cor, aroma, textura e luz.</p>
+              <ul class="capa__chamadas"><li>Ritual</li><li>Aroma</li><li>Textura</li><li>Arte na pele</li></ul>
+              <span class="capa__abrir">Abrir edição<span>→</span></span>
+            </div>
+          </div>
+        </a>
+
+        <a class="capa iridescente entra entra-2"
+           style="--capa-cor-a:rgba(139, 79, 159, 0.22)"
+           href="/edicao/makeup/"
+           data-capa
+           aria-label="Abrir edição 02: Makeup também é autocuidado.">
+          <div class="capa__foto">
+            <img src="/assets/images/foto1.jpeg" alt="May deitada sobre fundo claro, cabelo ruivo espalhado ao redor do rosto, maquiagem em tons quentes, vestindo jeans."
+                 width="1122" height="1402"
+                 loading="lazy" decoding="async">
+          </div>
+          <div class="capa__luz" aria-hidden="true"></div>
+          <div class="capa__grade">
+            <div class="capa__topo">
+              <span class="capa__marca">MayLumina</span>
+              <span>Edição 02</span>
+            </div>
+            <h3 class="capa__manchete">Makeup <br>também é <br>autocuidado.</h3>
+            <div class="capa__base">
+              <p class="capa__deck">Cor, expressão, presença e identidade.</p>
+              <ul class="capa__chamadas"><li>Cor</li><li>Expressão</li><li>Identidade</li><li>Presença</li></ul>
+              <span class="capa__abrir">Abrir edição<span>→</span></span>
+            </div>
+          </div>
+        </a>
+
+        <!-- CAPAS:FIM -->
+      </div>
     </div>
   </section>
 
@@ -255,93 +324,14 @@
 </footer>
 
 <script type="module">
-  import { EDICOES } from '/assets/js/edicoes.js';
   import '/assets/js/maylumina.js';
+  import { aberturaDeEdicao } from '/assets/js/maylumina.js';
 
-  /* As capas nascem do modelo de edições: acrescentar a próxima edição
-     é acrescentar um objeto, nunca duplicar marcação. */
-  const banca = document.getElementById('banca');
-  const publicadas = EDICOES.filter((e) => e.status === 'publicada');
-
-  document.getElementById('contagem-edicoes').textContent =
-    String(publicadas.length).padStart(2, '0') + (publicadas.length === 1 ? ' publicada' : ' publicadas');
-
-  EDICOES.forEach((ed, i) => {
-    const publicada = ed.status === 'publicada';
-    const capa = document.createElement(publicada ? 'a' : 'article');
-    capa.className = 'capa iridescente entra entra-' + Math.min(i + 1, 3);
-    capa.style.setProperty('--capa-cor-a', ed.corLuz);
-    if (publicada) {
-      capa.href = ed.url;
-      capa.setAttribute('data-capa', '');
-      capa.setAttribute('aria-label', `Abrir edição ${ed.numero}: ${ed.titulo}`);
-    } else {
-      capa.classList.add('capa--breve');
-    }
-
-    const foto = document.createElement('div');
-    foto.className = 'capa__foto';
-    const img = document.createElement('img');
-    img.src = ed.capa.src;
-    img.alt = ed.capa.alt;
-    img.width = ed.capa.largura;
-    img.height = ed.capa.altura;
-    img.loading = i === 0 ? 'eager' : 'lazy';
-    img.decoding = 'async';
-    if (i === 0) img.fetchPriority = 'high';
-    foto.appendChild(img);
-
-    const luz = document.createElement('div');
-    luz.className = 'capa__luz';
-    luz.setAttribute('aria-hidden', 'true');
-
-    const grade = document.createElement('div');
-    grade.className = 'capa__grade';
-
-    const topo = document.createElement('div');
-    topo.className = 'capa__topo';
-    topo.innerHTML =
-      '<span class="capa__marca">MayLumina</span>' +
-      `<span>Edição ${ed.numero}</span>`;
-
-    const manchete = document.createElement('h3');
-    manchete.className = 'capa__manchete';
-    ed.manchete.forEach((linha, k) => {
-      const ultima = k === ed.manchete.length - 1;
-      // O espaco vai ANTES do <br>: sem ele o textContent cola as palavras
-      // ("Autocuidadotambem e arte") para leitor de tela e crawler.
-      manchete.appendChild(document.createTextNode(ultima ? linha : linha + ' '));
-      if (!ultima) manchete.appendChild(document.createElement('br'));
-    });
-
-    const base = document.createElement('div');
-    base.className = 'capa__base';
-
-    const deck = document.createElement('p');
-    deck.className = 'capa__deck';
-    deck.textContent = ed.deck;
-
-    const chamadas = document.createElement('ul');
-    chamadas.className = 'capa__chamadas';
-    ed.chamadas.slice(0, 4).forEach((c) => {
-      const li = document.createElement('li');
-      li.textContent = c;
-      chamadas.appendChild(li);
-    });
-
-    base.append(deck, chamadas);
-
-    if (publicada) {
-      const abrir = document.createElement('span');
-      abrir.className = 'capa__abrir';
-      abrir.append(ed.cta, Object.assign(document.createElement('span'), { textContent: '→' }));
-      base.appendChild(abrir);
-    }
-
-    grade.append(topo, manchete, base);
-    capa.append(foto, luz, grade);
-    banca.appendChild(capa);
-  });
+  /* As capas já vieram no HTML — geradas a partir de EDICOES por
+     tools/gerar-capas.mjs. Ao JavaScript resta só o que é movimento:
+     ligar a transição capa -> hero da edição. Sem JS, a banca continua
+     inteira, com links reais. */
+  aberturaDeEdicao();
 
   document.getElementById('ano').textContent = new Date().getFullYear();
 </script>

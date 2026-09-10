@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Marca que o JavaScript está vivo ANTES da primeira pintura. Só o que
+       estiver sob `.js` pode se esconder à espera de animação; sem JS a
+       página aparece inteira. -->
+  <script>document.documentElement.classList.add('js');</script>
 <title>Makeup também é autocuidado — Edição 02 · MayLumina</title>
 <meta name="description" content="Edição 02 da MayLumina: maquiagem como ritual de presença. Cor que expressa identidade, não que esconde.">
 <link rel="canonical" href="https://maylumina.vercel.app/edicao/makeup/">
@@ -14,19 +18,26 @@
 <meta property="og:title" content="Makeup também é autocuidado — Edição 02 · MayLumina">
 <meta property="og:description" content="Cor, expressão, presença e identidade.">
 <meta property="og:url" content="https://maylumina.vercel.app/edicao/makeup/">
-<meta property="og:image" content="https://maylumina.vercel.app/assets/images/foto1.jpeg">
-<meta property="og:image:alt" content="May deitada sobre fundo claro, cabelo ruivo espalhado, maquiagem em tons quentes.">
+<meta property="og:image" content="https://maylumina.vercel.app/assets/og/og-makeup.jpg">
+<meta property="og:image:alt" content="Cartão da Edição 02, Makeup: &quot;Makeup também é autocuidado.&quot; sobre um campo de luz em roxo e turquesa.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Makeup também é autocuidado — Edição 02 · MayLumina">
 <meta name="twitter:description" content="Cor, expressão, presença e identidade.">
-<meta name="twitter:image" content="https://maylumina.vercel.app/assets/images/foto1.jpeg">
+<meta name="twitter:image" content="https://maylumina.vercel.app/assets/og/og-makeup.jpg">
+<meta name="twitter:image:alt" content="Cartão da Edição 02, Makeup: &quot;Makeup também é autocuidado.&quot; sobre um campo de luz em roxo e turquesa.">
 
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/site.webmanifest">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Quicksand:wght@400;600;700&display=swap">
+<!-- Tipografia hospedada no próprio projeto: sem terceiro no caminho
+     crítico e sem entregar o IP do visitante ao Google. Ver
+     assets/css/fontes.css. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/cormorant-garamond-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/quicksand-latin.woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/fontes.css">
 <link rel="stylesheet" href="/assets/css/maylumina.css">
 
 <script type="application/ld+json">
@@ -145,12 +156,33 @@
           </p>
         </div>
 
+        <!-- SLOT DE FOTOGRAFIA · EDIÇÃO 02 · abertura
+             Esta edição ainda não tem fotografia própria de maquiagem. Nada
+             aqui é banco de imagem e nada foi emprestado da Edição 01 para
+             fingir que tem. Enquanto a foto não existe, o lugar é ocupado por
+             pigmento — que é do que a edição fala.
+
+             Quando a fotografia chegar, trocar este bloco por:
+
+               <figure>
+                 <img src="/assets/images/makeup-abertura.jpg"
+                      width="904" height="1130" loading="eager" decoding="async"
+                      fetchpriority="high" alt="DESCREVER A CENA">
+                 <figcaption>Crédito · MayLumina</figcaption>
+               </figure>
+
+             A grade não muda. Ver docs/ASSET_GAPS.md. -->
         <div class="spread__foto entra entra-1">
           <figure>
-            <img src="/assets/images/foto6.jpeg" width="904" height="1280" loading="eager" decoding="async"
-                 fetchpriority="high"
-                 alt="May agachada em estúdio, jaqueta verde-limão sobre top turquesa e calça larga turquesa, cabelo ruivo preso, olhando para a câmera.">
-            <figcaption>Maquiadora · inventora · MayLumina</figcaption>
+            <div class="placa" role="img"
+                 aria-label="Campo de pigmento roxo, turquesa e rosa sobreposto, como aquarela vista de perto."
+                 style="--pl-a:var(--roxo-luz); --pl-b:var(--turquesa-luz); --pl-c:var(--pink-luz)">
+              <span class="placa__gota" aria-hidden="true"></span>
+              <span class="placa__gota" aria-hidden="true"></span>
+              <span class="placa__gota" aria-hidden="true"></span>
+              <span class="placa__grao" aria-hidden="true"></span>
+            </div>
+            <figcaption>Pigmento · Edição 02</figcaption>
           </figure>
         </div>
       </div>
@@ -272,8 +304,13 @@
     </div>
   </section>
 
-  <!-- ═══ VITRINE DESTA EDIÇÃO ═══ -->
-  <section class="folha folha--justa" id="vitrine" aria-labelledby="titulo-vitrine">
+  <!-- ═══ VITRINE DESTA EDIÇÃO ═══
+       Nasce `hidden`: enquanto não houver produto de categoria "makeup" no
+       Supabase, esta seção simplesmente não existe na página nem no leitor
+       de tela. A edição é para ser completa com zero produto — ela termina
+       no agendamento, que é o que a May de fato oferece hoje. Assim que o
+       primeiro produto for cadastrado, produtos.js revela a seção. -->
+  <section class="folha folha--justa" id="vitrine" aria-labelledby="titulo-vitrine" hidden>
     <div class="limite">
       <div class="ficha entra" style="margin-bottom:1.4rem">
         <span>A coleção</span>
@@ -331,7 +368,7 @@
   import '/assets/js/maylumina.js';
   import { carregarProdutos } from '/assets/js/produtos.js';
 
-  carregarProdutos({ alvo: '#vitrine-produtos', categoria: 'makeup' });
+  carregarProdutos({ alvo: '#vitrine-produtos', categoria: 'makeup', secao: '#vitrine' });
   document.getElementById('ano').textContent = new Date().getFullYear();
 </script>
 </body>

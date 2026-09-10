@@ -87,27 +87,47 @@ function entradaEluz() {
     return;
   }
 
+  const revelar = (el) => {
+    el.classList.add('visivel');
+
+    // A luz varre a peça uma única vez, quando ela entra em cena
+    if (el.hasAttribute('data-luz')) {
+      el.classList.add('acesa');
+      el.addEventListener('animationend', () => el.classList.remove('acesa'), {
+        once: true
+      });
+    }
+  };
+
   const observador = new IntersectionObserver(
     (entradas) => {
       entradas.forEach((entrada) => {
         if (!entrada.isIntersecting) return;
-        const el = entrada.target;
-        el.classList.add('visivel');
-
-        // A luz varre a peça uma única vez, quando ela entra em cena
-        if (el.hasAttribute('data-luz')) {
-          el.classList.add('acesa');
-          el.addEventListener('animationend', () => el.classList.remove('acesa'), {
-            once: true
-          });
-        }
-        observador.unobserve(el);
+        revelar(entrada.target);
+        observador.unobserve(entrada.target);
       });
     },
     { threshold: 0.16, rootMargin: '0px 0px -8% 0px' }
   );
 
   alvos.forEach((el) => observador.observe(el));
+
+  /* A margem negativa de 8% existe para o conteúdo de baixo não acender
+     antes da hora. Só que ela também corta a faixa final do hero — as
+     chamadas e o "Ler a edição" caem justamente nesses últimos pixels e
+     ficavam invisíveis para sempre em telas curtas, que é o contrário do
+     que a peça serve para fazer. Então: o que já está na primeira tela
+     acende agora, sem esperar rolagem que talvez nunca venha. */
+  requestAnimationFrame(() => {
+    alvos.forEach((el) => {
+      if (el.classList.contains('visivel')) return;
+      const r = el.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < window.innerHeight && r.height > 0) {
+        revelar(el);
+        observador.unobserve(el);
+      }
+    });
+  });
 }
 
 /* ── REFRAÇÃO DA MANCHETE ────────────────────────────────────────────
@@ -135,7 +155,20 @@ function refracao() {
 function fundoEmVideo() {
   const video = document.querySelector('[data-fundo-video]');
   const cortina = document.querySelector('[data-cortina]');
-  if (!video) return;
+
+  // Hero com fotografia em vez de vídeo: a cortina de luz é só a entrada,
+  // então ela se dissolve assim que a imagem estiver pronta. Sem isto a
+  // luz cobriria a fotografia para sempre.
+  if (!video) {
+    if (!cortina) return;
+    const foto = cortina.parentElement?.querySelector('img');
+    const abrir = () => cortina.classList.add('dissolvida');
+    if (!foto) { abrir(); return; }
+    if (foto.complete) requestAnimationFrame(abrir);
+    else foto.addEventListener('load', abrir, { once: true });
+    foto.addEventListener('error', abrir, { once: true });
+    return;
+  }
 
   // A propriedade — não só o atributo — é o que libera o autoplay
   video.muted = true;
@@ -202,46 +235,65 @@ function fundoEmVideo() {
 
 /* ── ABERTURA DE EDIÇÃO ──────────────────────────────────────────────
    A capa não vira página: ela se expande e vira o hero da edição.
-   Com View Transitions quando houver; com uma expansão própria quando
-   não houver. Nunca depende só da API.                                */
+
+   A continuidade é feita por VIEW TRANSITIONS CROSS-DOCUMENT, declaradas
+   no CSS (@view-transition { navigation: auto }). Aqui o JS faz uma coisa
+   só: marcar QUAL capa foi clicada, para o navegador ligá-la ao hero de
+   destino. A navegação segue sendo um link comum — nada é interceptado.
+
+   document.startViewTransition() NÃO serve aqui: ela é same-document, e
+   envolvê-la em window.location.href apenas anima a saída e descarta o
+   resultado ao trocar de documento.                                     */
 function aberturaDeEdicao() {
   const capas = document.querySelectorAll('[data-capa]');
   if (!capas.length) return;
+
+  const temCrossDoc =
+    'CSSViewTransitionRule' in window ||
+    (document.startViewTransition && 'onpagereveal' in window);
+
+  function marcar(capa) {
+    // Só uma capa por vez pode ter o nome, senão a transição é descartada
+    capas.forEach((c) => (c.style.viewTransitionName = ''));
+    capa.style.viewTransitionName = 'capa-ativa';
+  }
+
+  capas.forEach((capa) => {
+    // Ao apenas apontar já preparamos: o nome precisa estar aplicado
+    // antes de a navegação começar.
+    capa.addEventListener('pointerenter', () => marcar(capa));
+    capa.addEventListener('focus', () => marcar(capa));
+    capa.addEventListener('click', () => marcar(capa));
+  });
+
+  // Voltando pelo histórico, o nome não pode ficar preso numa capa antiga
+  window.addEventListener('pageshow', () => {
+    capas.forEach((c) => (c.style.viewTransitionName = ''));
+  });
+
+  // Alternativa para quem não tem cross-document: a capa cresce até a
+  // viewport e só então navega. Sem isso, o link continua funcionando.
+  if (temCrossDoc || semMovimento()) return;
 
   capas.forEach((capa) => {
     capa.addEventListener('click', (e) => {
       const destino = capa.getAttribute('href');
       if (!destino || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-      if (semMovimento()) return; // navegação direta, sem teatro
-
-      // Caminho nativo: o navegador faz a continuidade entre as páginas
-      if (document.startViewTransition) {
-        e.preventDefault();
-        capa.style.viewTransitionName = 'capa-aberta';
-        document.startViewTransition(() => { window.location.href = destino; });
-        return;
-      }
-
-      // Alternativa: a capa cresce até a viewport antes de navegar
       e.preventDefault();
+
       const caixa = capa.getBoundingClientRect();
       const clone = capa.cloneNode(true);
       Object.assign(clone.style, {
         position: 'fixed',
-        left: caixa.left + 'px',
-        top: caixa.top + 'px',
-        width: caixa.width + 'px',
-        height: caixa.height + 'px',
-        margin: '0',
-        zIndex: '300',
-        transition: 'all 0.62s cubic-bezier(0.16, 1, 0.3, 1)',
-        pointerEvents: 'none'
+        left: caixa.left + 'px', top: caixa.top + 'px',
+        width: caixa.width + 'px', height: caixa.height + 'px',
+        margin: '0', zIndex: '300', pointerEvents: 'none',
+        transition: 'all 0.62s cubic-bezier(0.16, 1, 0.3, 1)'
       });
       document.body.appendChild(clone);
       requestAnimationFrame(() => {
         Object.assign(clone.style, {
-          left: '0px', top: '0px',
-          width: '100vw', height: '100svh'
+          left: '0px', top: '0px', width: '100vw', height: '100svh'
         });
       });
       setTimeout(() => { window.location.href = destino; }, 560);
@@ -255,6 +307,8 @@ function iniciar() {
   entradaEluz();
   refracao();
   fundoEmVideo();
+  // Na Home as capas ainda nao existem neste ponto: ela chama
+  // aberturaDeEdicao() de novo depois de montar a banca.
   aberturaDeEdicao();
   document.documentElement.classList.add('pronto');
 }
@@ -265,4 +319,4 @@ if (document.readyState === 'loading') {
   iniciar();
 }
 
-export { semMovimento };
+export { semMovimento, aberturaDeEdicao };

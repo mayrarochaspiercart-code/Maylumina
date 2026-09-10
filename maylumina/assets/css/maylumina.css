@@ -6,6 +6,29 @@
    A luz é a origem. A cor é o que ela vira ao tocar a matéria.
    ═══════════════════════════════════════════════════════════════════ */
 
+/* ── TRANSICAO ENTRE DOCUMENTOS ───────────────────────────────────
+   As edicoes sao URLs reais: a continuidade da capa para o hero e feita
+   com view transitions CROSS-DOCUMENT, declarativas. O link continua
+   sendo um link — nada bloqueia a navegacao normal.                    */
+@view-transition { navigation: auto; }
+
+/* A capa clicada e o hero de destino compartilham o mesmo nome, entao o
+   navegador liga uma coisa na outra. O nome e posto na capa no clique;
+   o hero da edicao carrega o nome sempre. */
+.masthead__fundo { view-transition-name: capa-ativa; }
+
+::view-transition-old(capa-ativa),
+::view-transition-new(capa-ativa) {
+  animation-duration: 0.62s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+::view-transition-group(capa-ativa) { animation-duration: 0.62s; }
+
+/* Quem nao respeita movimento nao recebe transicao alguma */
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
 /* ── RESET ───────────────────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -165,10 +188,10 @@ img, video { display: block; max-width: 100%; }
   border: 0;
   background: linear-gradient(90deg,
     transparent, var(--laranja), var(--pink), var(--roxo), var(--turquesa), transparent);
-  transform: scaleX(0);
   transform-origin: left;
   transition: transform 1.6s var(--passo-luz);
 }
+.js .fio-luz { transform: scaleX(0); }
 .fio-luz.visivel { transform: scaleX(1); }
 
 /* Borda iridescente — capas e cards no hover/focus */
@@ -192,8 +215,11 @@ img, video { display: block; max-width: 100%; }
   transition: opacity 0.5s var(--passo);
 }
 
-/* ── Entrada de conteúdo (apoio, nunca a linguagem principal) ────── */
-.entra { opacity: 0; transform: translateY(22px); }
+/* ── Entrada de conteúdo (apoio, nunca a linguagem principal) ──────
+   Tudo o que esconde conteúdo à espera do JavaScript é escopado em `.js`,
+   classe que o próprio JavaScript põe no <html> antes da primeira pintura.
+   Sem JavaScript nada fica escondido: a página é estática, mas inteira. */
+.js .entra { opacity: 0; transform: translateY(22px); }
 .entra.visivel {
   opacity: 1;
   transform: none;
@@ -207,9 +233,9 @@ img, video { display: block; max-width: 100%; }
 .linha-mascara { display: block; overflow: hidden; }
 .linha-mascara > span {
   display: block;
-  transform: translateY(105%);
   transition: transform 1.1s var(--passo-luz);
 }
+.js .linha-mascara > span { transform: translateY(105%); }
 .visivel .linha-mascara > span,
 .linha-mascara.visivel > span { transform: none; }
 .linha-mascara:nth-child(2) > span { transition-delay: 0.09s; }
@@ -364,6 +390,9 @@ img, video { display: block; max-width: 100%; }
    ESTRUTURA EDITORIAL
    ═══════════════════════════════════════════════════════════════════ */
 .folha { padding: var(--respiro) var(--margem); }
+/* Uma edição sem produto não mostra seção de produto — nem em tela,
+   nem no leitor de tela. */
+section[hidden] { display: none; }
 .folha--justa { padding-block: clamp(3rem, 7vh, 6rem); }
 .limite { max-width: 1440px; margin-inline: auto; }
 .limite--texto { max-width: 780px; margin-inline: auto; }
@@ -551,6 +580,15 @@ img, video { display: block; max-width: 100%; }
   transition: opacity 1.3s var(--passo-luz);
 }
 .cortina.dissolvida { opacity: 0; }
+
+/* Hero com fotografia: a luz não sai de cena por completo — ela fica como
+   um véu, que é o que mantém a manchete legível sobre a imagem. */
+.cortina--sobre-foto.dissolvida { opacity: 0.62; }
+/* Sem JavaScript ninguém dissolve a cortina — então ela já nasce véu, e a
+   fotografia do hero aparece do mesmo jeito. */
+html:not(.js) .cortina--sobre-foto { opacity: 0.62; }
+
+.masthead__fundo img { object-position: center 28%; }
 
 @keyframes luzViva {
   0%   { background-position: 0% 0%, 100% 0%, 50% 100%, 0% 50%; }
@@ -893,6 +931,62 @@ figcaption {
   padding: 0.95rem 0.7rem;
 }
 .trio__texto { margin-top: 1.1rem; font-size: 0.98rem; line-height: 1.7; color: var(--tinta-suave); }
+
+/* Placa de pigmento — ocupa exatamente o lugar da fotografia enquanto a
+   fotografia editorial de uma edição ainda não existe. Não imita foto e
+   não é papel de parede: é pigmento visto de perto, sobreposto em
+   multiply como aquarela sobre papel. Quando a foto chegar, troca-se a
+   .placa pela <figure> com <img> e nada mais muda — a grade é a mesma. */
+.placa {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(170deg, var(--branco), var(--papel-claro) 62%, var(--papel));
+}
+.placa__gota {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  /* Borrão largo de propósito: o que tem que aparecer é campo de cor, não
+     três círculos — círculo nítido vira diagrama, e diagrama não é pigmento. */
+  filter: blur(72px);
+  opacity: 0.85;
+  animation: pigmentoRespira 26s ease-in-out infinite;
+}
+.placa__gota:nth-child(1) {
+  inset: -22% auto auto -30%;
+  width: 96%; aspect-ratio: 1;
+  background: var(--pl-a, var(--roxo-luz));
+}
+.placa__gota:nth-child(2) {
+  inset: 12% -34% auto auto;
+  width: 104%; aspect-ratio: 1;
+  background: var(--pl-b, var(--turquesa-luz));
+  animation-delay: -9s;
+}
+.placa__gota:nth-child(3) {
+  inset: auto auto -30% -6%;
+  width: 92%; aspect-ratio: 1;
+  background: var(--pl-c, var(--pink-luz));
+  animation-delay: -18s;
+}
+/* O grão impede que a placa vire gradiente de banco de imagens. */
+.placa__grao {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image:
+    repeating-linear-gradient(112deg, rgba(59, 47, 53, 0.045) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(22deg, rgba(59, 47, 53, 0.03) 0 1px, transparent 1px 7px);
+}
+@keyframes pigmentoRespira {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(4%, -5%, 0) scale(1.1); }
+}
+}
 
 /* Spread tipográfico — para quando não há fotografia, e mesmo assim
    a página precisa ter direção de arte. */
@@ -1292,6 +1386,7 @@ body.travado { overflow: hidden; }
   .cortina { animation: none; background-position: 30% 40%, 70% 30%, 50% 90%, 40% 50%; }
   .faixa__trilho { animation: none; }
   .tipo-spread__fundo { animation: none; }
+  .placa__gota { animation: none; }
 }
 
 @media print {

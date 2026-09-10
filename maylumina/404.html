@@ -3,13 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Marca que o JavaScript está vivo ANTES da primeira pintura. Só o que
+       estiver sob `.js` pode se esconder à espera de animação; sem JS a
+       página aparece inteira. -->
+  <script>document.documentElement.classList.add('js');</script>
 <title>Página não encontrada — MayLumina</title>
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#F2EAE0">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500&family=Quicksand:wght@400;600;700&display=swap">
+<!-- Tipografia hospedada no próprio projeto: sem terceiro no caminho
+     crítico e sem entregar o IP do visitante ao Google. Ver
+     assets/css/fontes.css. -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/cormorant-garamond-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/quicksand-latin.woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/fontes.css">
 <link rel="stylesheet" href="/assets/css/maylumina.css">
 </head>
 <body>
