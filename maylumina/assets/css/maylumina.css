@@ -329,9 +329,16 @@ img, video { display: block; max-width: 100%; }
   background: var(--papel);
   transform: translateY(-100%);
   visibility: hidden;
-  transition: transform 0.7s var(--passo-luz), visibility 0.7s;
+  /* A visibilidade vira na hora ao abrir (para o foco poder entrar) e só
+     espera a animação ao fechar. Transicioná-la mantinha o painel oculto
+     durante toda a abertura, e elemento oculto não aceita foco. */
+  transition: transform 0.7s var(--passo-luz), visibility 0s linear 0.7s;
 }
-.menu.aberto { transform: none; visibility: visible; }
+.menu.aberto {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.7s var(--passo-luz), visibility 0s;
+}
 .menu__item {
   font-family: var(--display);
   font-size: clamp(2rem, 9vw, 3.2rem);

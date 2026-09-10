@@ -31,7 +31,9 @@ function navegacao() {
     menu.removeAttribute('inert');
     botao.setAttribute('aria-expanded', 'true');
     document.body.classList.add('travado');
-    focaveis()[0]?.focus();
+    // O foco entra só depois de o painel ficar visível: enquanto o CSS
+    // mantiver visibility:hidden, a chamada de foco se perde.
+    requestAnimationFrame(() => focaveis()[0]?.focus());
   }
 
   function fechar() {
