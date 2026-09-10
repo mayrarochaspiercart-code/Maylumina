@@ -1,0 +1,11 @@
+{
+  "name": "MayLumina",
+  "short_name": "MayLumina",
+  "description": "Uma publicação viva sobre as diferentes cores do autocuidado.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2EAE0",
+  "theme_color": "#F2EAE0",
+  "lang": "pt-BR",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
