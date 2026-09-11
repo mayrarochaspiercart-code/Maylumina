@@ -26,11 +26,41 @@ ENTRADA = RAIZ / 'fotos-entrada'
 SAIDA = RAIZ / 'maylumina' / 'assets' / 'images'
 
 # nome final -> (nome de entrada aceito, lado maior alvo, peso alvo em KB, proporção esperada)
+# O lado maior de saida vem do tamanho REAL do slot, medido no navegador,
+# com folga para tela 2x — nao de um numero redondo. Pedir 1600px para um
+# card que renderiza 413px de largura e peso jogado fora, e foi isso que
+# fez a primeira passada estourar todos os alvos.
+#
+# CROP: fracoes (esq, topo, dir, base) do original, aplicadas ANTES de
+# reamostrar. So entra aqui o recorte que foi escolhido comparando opcoes
+# lado a lado — nao e ajuste fino de layout, que continua sendo
+# object-position no CSS.
+CROP = {
+    # A boca ocupava pouco do card 3:4: o arquivo 1:1 mostra 100% da altura,
+    # entao o nariz comia o topo e o assunto ficava pequeno. Comparei tres
+    # recortes; este deixa a boca dominante, o nariz parcial, o queixo
+    # respirando e os cantos dos labios longe da borda.
+    'makeup-boca.jpg': (0.13, 0.18, 0.87, 0.88),
+}
+# Proporcao final forcada, quando o slot exige (corta do centro).
+PROPORCAO = {'makeup-boca.jpg': 0.75}   # 3:4, igual ao card do trio
+
+#   nome final: (prefixo de entrada, lado maior, peso alvo KB, proporcao, por que)
 ASSETS = {
-    'makeup-olhos.jpg':  ('makeup-olhos',  1600, 180, (0.70, 0.85)),
-    'makeup-boca.jpg':   ('makeup-boca',   1400, 120, (0.95, 1.05)),
-    'makeup-gesto.jpg':  ('makeup-gesto',  1600, 150, (0.70, 0.85)),
-    'bodycare-kit.jpg':  ('bodycare-kit',  1600, 150, (0.70, 0.85)),
+    # Fundo de secao inteira, renderizado a 1440x720 no desktop sob um veu de
+    # 30-80%. Medido: nenhuma combinacao bate os 180KB do briefing sem upscale
+    # visivel — a foto tem cabelo fino, glitter e sarda, que comprimem mal.
+    # 1150px a q80 da 249KB com upscale de 1.25x, invisivel sob o veu; 1024px
+    # daria 203KB mas 1.41x ja aparece em tela grande. O alvo do briefing foi
+    # estimado sem conhecer a textura do material.
+    'makeup-olhos.jpg':  ('makeup-olhos',  1438, 250, (0.70, 0.85)),
+    # cards do trio: 413x550 no desktop, 266x355 no celular -> 2x de 413 = 826
+    # depois do recorte a boca sai 658x878 (1,6x o card de 413x550): o
+    # original nao tem pixel para 2x nesse enquadramento, e apertar menos
+    # custaria o enquadramento, que e o que importa aqui
+    'makeup-boca.jpg':   ('makeup-boca',   1140, 120, (0.95, 1.05)),
+    'makeup-gesto.jpg':  ('makeup-gesto',  1140, 150, (0.70, 0.85)),
+    'bodycare-kit.jpg':  ('bodycare-kit',  1140, 150, (0.70, 0.85)),
 }
 EXTS = ('.jpg', '.jpeg', '.png', '.webp', '.avif', '.tif', '.tiff')
 
@@ -92,10 +122,27 @@ def main():
         w0, h0 = im.size
         im, converteu = para_srgb(im)
 
+        if final in CROP:
+            l, t, r, b = CROP[final]
+            im = im.crop((int(l*w0), int(t*h0), int(r*w0), int(b*h0)))
+        if final in PROPORCAO:
+            alvo_w = round(im.size[1] * PROPORCAO[final])
+            if alvo_w < im.size[0]:
+                dx = (im.size[0] - alvo_w) // 2
+                im = im.crop((dx, 0, dx + alvo_w, im.size[1]))
+            else:
+                alvo_h = round(im.size[0] / PROPORCAO[final])
+                dy = (im.size[1] - alvo_h) // 2
+                im = im.crop((0, dy, im.size[0], dy + alvo_h))
+        w0, h0 = im.size
+
         if max(w0, h0) < lado:
-            erros.append(f'{origem.name}: {w0}x{h0} — abaixo do mínimo de {lado}px no lado maior')
+            print(f'  ⚠ {final}: original {w0}x{h0} é menor que o alvo de {lado}px — '
+                  f'não faço upscale, vai no tamanho que veio')
 
         razao = w0 / h0
+        if final in PROPORCAO:
+            ar = (PROPORCAO[final] - 0.02, PROPORCAO[final] + 0.02)
         if not (ar[0] <= razao <= ar[1]):
             print(f'  ⚠ {final}: proporção {razao:.2f} fora do previsto {ar[0]}–{ar[1]} — '
                   f'confira o enquadramento antes de publicar')

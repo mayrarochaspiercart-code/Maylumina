@@ -1,0 +1,4 @@
+# originais de alta resolução: entram no fluxo, não no deploy
+fotos-entrada/*.png
+fotos-entrada/*.tif
+fotos-entrada/*.tiff
