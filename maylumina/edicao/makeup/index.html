@@ -95,37 +95,44 @@
 
 <main id="conteudo">
 
-  <!-- ═══ CAPA ═══ -->
-  <section class="masthead" data-hero aria-labelledby="titulo-edicao">
-    <div class="masthead__fundo">
-      <div class="cortina" aria-hidden="true"></div>
+  <!-- ═══ CAPA — Edição 02 ═══
+       Estúdio, não imersão. A 01 mergulha em água e pigmento; a 02 é
+       recorte seco sobre branco, e a cor vem do assunto. A manchete
+       avança sobre a fotografia de propósito. -->
+  <section class="capa-ed" data-hero aria-labelledby="titulo-edicao">
+    <div class="capa-ed__foto">
+      <img src="/assets/images/makeup-capa.jpg" width="900" height="1185"
+           loading="eager" decoding="async" fetchpriority="high"
+           alt="May deitada sobre fundo branco, cabelo ruivo espalhado ao redor do rosto,
+                maquiagem em tons quentes com olhos delineados e boca acetinada, vestindo jeans.">
     </div>
-    <div class="masthead__veu" aria-hidden="true"></div>
 
-    <div class="masthead__corpo">
-      <p class="ficha entra visivel" style="margin-bottom:1.4rem">
+    <div class="capa-ed__rodape">
+      <p class="ficha entra visivel">
         <span>MayLumina</span>
         <span class="ficha__risco" aria-hidden="true"></span>
         <span>Edição 02</span>
         <span class="ficha__risco" aria-hidden="true"></span>
         <span>Cor &amp; Expressão</span>
       </p>
-
-      <h1 id="titulo-edicao" class="manchete manchete--capa luz-varre" data-luz data-refrata>
-        <span class="linha-mascara"><span>Makeup</span></span>
-        <span class="linha-mascara"><span>também é</span></span>
-        <span class="linha-mascara"><span><em>autocuidado.</em></span></span>
-      </h1>
-
-      <p class="deck entra entra-1" style="margin-top:1.6rem; font-size:var(--t-sub)">
-        Cor, expressão, presença e identidade.
-      </p>
+      <p class="ficha entra visivel"><span>Estúdio · 2026</span></p>
     </div>
 
-    <div class="masthead__rodape">
-      <ul class="capa__chamadas entra entra-2" style="max-width:34ch">
+    <div class="capa-ed__corpo">
+      <h1 id="titulo-edicao" class="capa-ed__manchete" data-refrata>
+        <span class="linha-mascara"><span>Makeup</span></span>
+        <span class="linha-mascara"><span>também é</span></span>
+        <span class="linha-mascara"><span><em><b>autocuidado.</b></em></span></span>
+      </h1>
+
+      <p class="capa-ed__deck entra entra-1">
+        Cor, expressão, presença e identidade.
+      </p>
+
+      <ul class="capa__chamadas entra entra-2" style="max-width:38ch">
         <li>Cor</li><li>Expressão</li><li>Identidade</li><li>Presença</li>
       </ul>
+
       <a class="desce entra entra-3" href="#ritual">
         Ler a edição
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -156,33 +163,14 @@
           </p>
         </div>
 
-        <!-- SLOT DE FOTOGRAFIA · EDIÇÃO 02 · abertura
-             Esta edição ainda não tem fotografia própria de maquiagem. Nada
-             aqui é banco de imagem e nada foi emprestado da Edição 01 para
-             fingir que tem. Enquanto a foto não existe, o lugar é ocupado por
-             pigmento — que é do que a edição fala.
-
-             Quando a fotografia chegar, trocar este bloco por:
-
-               <figure>
-                 <img src="/assets/images/makeup-abertura.jpg"
-                      width="904" height="1130" loading="eager" decoding="async"
-                      fetchpriority="high" alt="DESCREVER A CENA">
-                 <figcaption>Crédito · MayLumina</figcaption>
-               </figure>
-
-             A grade não muda. Ver docs/ASSET_GAPS.md. -->
         <div class="spread__foto entra entra-1">
-          <figure>
-            <div class="placa" role="img"
-                 aria-label="Campo de pigmento roxo, turquesa e rosa sobreposto, como aquarela vista de perto."
-                 style="--pl-a:var(--roxo-luz); --pl-b:var(--turquesa-luz); --pl-c:var(--pink-luz)">
-              <span class="placa__gota" aria-hidden="true"></span>
-              <span class="placa__gota" aria-hidden="true"></span>
-              <span class="placa__gota" aria-hidden="true"></span>
-              <span class="placa__grao" aria-hidden="true"></span>
-            </div>
-            <figcaption>Pigmento · Edição 02</figcaption>
+          <figure class="figura--recorte">
+            <img src="/assets/images/makeup-presenca.jpg" width="904" height="922"
+                 loading="lazy" decoding="async"
+                 alt="May agachada em estúdio sobre fundo branco, jaqueta de couro verde-limão
+                      sobre top turquesa, calça larga turquesa, óculos escuros e salto verde-menta,
+                      cabelo ruivo preso.">
+            <figcaption>Presença · Edição 02</figcaption>
           </figure>
         </div>
       </div>

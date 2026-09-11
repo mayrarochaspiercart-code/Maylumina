@@ -696,7 +696,7 @@ html:not(.js) .cortina--sobre-foto { opacity: 0.62; }
   position: relative;
   display: block;
   text-decoration: none;
-  color: var(--tinta);
+  color: var(--papel);
   background: var(--papel-claro);
   aspect-ratio: 3 / 4;
   overflow: hidden;
@@ -730,9 +730,16 @@ html:not(.js) .cortina--sobre-foto { opacity: 0.62; }
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(242,234,224,0.72) 0%, rgba(242,234,224,0.12) 38%, rgba(59,47,53,0.44) 100%),
-    linear-gradient(140deg, var(--capa-cor-a, transparent), transparent 55%);
-  mix-blend-mode: normal;
+    /* A capa é lida de baixo para cima: é lá que a manchete senta, e é
+       lá que a sombra precisa ser densa de verdade. Antes o texto ficava
+       no meio da foto, com 12% de véu, e simplesmente sumia. */
+    linear-gradient(180deg,
+      rgba(42,33,41,0.34) 0%,
+      rgba(42,33,41,0.06) 26%,
+      rgba(42,33,41,0.60) 62%,
+      rgba(42,33,41,0.92) 100%),
+    /* a cor da edição tinge a sombra — é o que separa a 01 da 02 */
+    linear-gradient(150deg, var(--capa-cor-a, transparent) 0%, transparent 60%);
   transition: opacity 0.7s var(--passo);
 }
 
@@ -759,7 +766,7 @@ html:not(.js) .cortina--sobre-foto { opacity: 0.62; }
 .capa__marca { font-family: var(--display); letter-spacing: 0.3em; }
 
 .capa__manchete {
-  align-self: center;
+  align-self: end;
   font-family: var(--display);
   font-size: clamp(2rem, 4.4vw, 3.4rem);
   font-weight: 500;
@@ -767,6 +774,8 @@ html:not(.js) .cortina--sobre-foto { opacity: 0.62; }
   letter-spacing: -0.03em;
   text-transform: uppercase;
   text-wrap: balance;
+  color: var(--papel);
+  text-shadow: 0 1px 26px rgba(42,33,41,0.5);
 }
 
 .capa__base { display: grid; gap: 0.9rem; }
@@ -775,7 +784,7 @@ html:not(.js) .cortina--sobre-foto { opacity: 0.62; }
   font-family: var(--display);
   font-style: italic;
   font-size: 1.05rem;
-  color: var(--tinta);
+  color: var(--papel);
 }
 
 .capa__chamadas {
@@ -789,6 +798,8 @@ html:not(.js) .cortina--sobre-foto { opacity: 0.62; }
   text-transform: uppercase;
   color: var(--tinta-suave);
 }
+/* Dentro da capa o fundo é sombra, não papel: o texto inverte. */
+.capa .capa__chamadas { color: var(--papel); opacity: 0.82; }
 .capa__chamadas li { display: flex; align-items: center; gap: 0.9rem; }
 .capa__chamadas li:not(:last-child)::after {
   content: ''; width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.5;
@@ -802,7 +813,7 @@ html:not(.js) .cortina--sobre-foto { opacity: 0.62; }
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--tinta);
+  color: var(--papel);
 }
 .capa__abrir span { transition: transform 0.5s var(--passo); }
 .capa:hover .capa__abrir span, .capa:focus-visible .capa__abrir span { transform: translateX(6px); }
@@ -931,6 +942,164 @@ figcaption {
   padding: 0.95rem 0.7rem;
 }
 .trio__texto { margin-top: 1.1rem; font-size: 0.98rem; line-height: 1.7; color: var(--tinta-suave); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAPA DE EDIÇÃO COM ESTÚDIO — a Edição 02
+   A Edição 01 é imersão: fotografia sangrando, luz atravessando água.
+   A 02 é o oposto deliberado: estúdio, fundo branco, recorte seco. A cor
+   não está no papel, está no assunto — jaqueta, sombra, pigmento. Dois
+   mundos, a mesma publicação.
+   A manchete AVANÇA sobre a fotografia. É isso que faz parecer capa
+   impressa e não banner: o texto não pede licença à imagem.
+   ═══════════════════════════════════════════════════════════════════ */
+.capa-ed {
+  position: relative;
+  height: 100svh;
+  min-height: 34rem;
+  background: var(--branco);
+  overflow: clip;
+  isolation: isolate;
+}
+
+/* A fotografia ocupa a direita e sangra até a borda. Posição absoluta
+   de propósito: é ela que se ajusta à tela, não a tela que cresce para
+   caber a foto. */
+.capa-ed__foto {
+  position: absolute;
+  inset: 0 0 0 46%;
+  z-index: 0;
+}
+.capa-ed__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 58% 26%;
+}
+/* Véu só na aresta onde a tipografia encosta: a cor da foto é o conteúdo
+   da edição, não pode ser lavada. */
+.capa-ed__foto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    /* topo: sem isto a navegação e a ficha caem em cima do cabelo e
+       somem — legibilidade antes de efeito. */
+    linear-gradient(to bottom, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.70) 9%, transparent 22%),
+    linear-gradient(100deg, var(--branco) 0%, rgba(255,255,255,0.80) 12%, transparent 38%);
+}
+
+.capa-ed__rodape {
+  position: absolute;
+  z-index: 2;
+  inset: clamp(5.2rem, 10vh, 7.5rem) var(--margem) auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--gap);
+  flex-wrap: wrap;
+}
+
+.capa-ed__corpo {
+  position: absolute;
+  z-index: 2;
+  inset: auto var(--margem) clamp(2rem, 5.5vh, 4.2rem) var(--margem);
+  display: grid;
+  justify-items: start;
+  gap: clamp(0.8rem, 1.7vh, 1.5rem);
+  pointer-events: none;
+}
+.capa-ed__corpo > * { pointer-events: auto; }
+
+.capa-ed__manchete {
+  font-family: var(--display);
+  font-weight: 400;
+  /* Escala de capa: a manchete é o assunto, não o rótulo dele. */
+  font-size: clamp(3rem, 8.2vw, 9.5rem);
+  line-height: 0.84;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  color: var(--tinta);
+  margin: 0;
+  /* Sem limite de largura: é o transbordo da manchete sobre a coluna da
+     fotografia que faz a página parecer capa impressa. */
+  white-space: nowrap;
+}
+.capa-ed__manchete em {
+  font-style: italic;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  /* A última linha escapa a grade — deslocamento editorial, não acaso. */
+  display: block;
+  margin-left: 0.14em;
+}
+/* A cor da edição entra pela palavra, não pelo fundo. */
+.capa-ed__manchete b { font-weight: inherit; color: var(--roxo); }
+
+.capa-ed__deck {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(1.05rem, 1.7vw, 1.6rem);
+  line-height: 1.3;
+  color: var(--tinta-suave);
+  max-width: 24ch;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  /* Mobile não é o desktop espremido: a composição é outra. A fotografia
+     ocupa a faixa de cima; texto nenhum fica sobre ela, porque sobre
+     jeans e cabelo claro a ficha some. Tudo o que é palavra desce para o
+     branco, e a manchete sobe para morder a imagem. */
+  .capa-ed {
+    height: auto;
+    min-height: 100svh;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 52svh auto auto;
+    align-content: start;
+  }
+  .capa-ed__foto { position: relative; inset: auto; grid-row: 1; grid-column: 1; }
+  .capa-ed__foto img { object-position: 56% 16%; }
+  .capa-ed__foto::after {
+    background:
+      /* o nome da marca no topo cai sobre o cabelo; sem este véu ele some */
+      linear-gradient(to bottom, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.55) 8%, transparent 20%),
+      linear-gradient(to bottom, transparent 62%, rgba(255,255,255,0.92) 90%, var(--branco) 100%);
+  }
+  .capa-ed__rodape,
+  .capa-ed__corpo {
+    position: relative;
+    inset: auto;
+    grid-column: 1;
+    padding-inline: var(--margem);
+  }
+  .capa-ed__rodape { grid-row: 2; }
+  .capa-ed__corpo  { grid-row: 3; }
+  .capa-ed__rodape {
+    /* sobe e encosta na base da fotografia */
+    margin-top: -3.2svh;
+    margin-bottom: 1.1rem;
+    font-size: var(--t-meta);
+  }
+  .capa-ed__corpo { padding-bottom: clamp(1.8rem, 5vh, 3.2rem); }
+  .capa-ed__manchete {
+    font-size: clamp(2.4rem, 11.4vw, 5rem);
+    line-height: 0.9;
+    /* nowrap no celular corta a palavra dentro do overflow:clip da capa;
+       as quebras já são compostas à mão pelas linhas-máscara. */
+    white-space: normal;
+  }
+  .capa-ed__deck { max-width: 100%; }
+}
+
+/* Figura recortada — fotografia de estúdio com fundo branco puro
+   assentando no papel creme em vez de flutuar numa caixa branca.
+   multiply deixa o creme atravessar o branco do estúdio e preserva a
+   figura: o efeito é de imagem impressa na página, não colada sobre ela. */
+.figura--recorte img {
+  mix-blend-mode: multiply;
+  background: transparent;
+}
 
 /* Placa de pigmento — ocupa exatamente o lugar da fotografia enquanto a
    fotografia editorial de uma edição ainda não existe. Não imita foto e

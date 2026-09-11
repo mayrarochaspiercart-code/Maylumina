@@ -30,33 +30,49 @@ Formato: **MP4 H.264, 720×1280, faststart ativado**, até ~3 MB. Colocar em
 `<img>` em `edicao/art-body-care/index.html` — o comentário no HTML tem a
 marcação exata.
 
-## 1. Fotografia de maquiagem — Edição 02 (maior impacto)
+## 1. Fotografia de maquiagem — Edição 02 (revisado)
 
-Não existe **nenhuma** fotografia de maquiagem no acervo. A Edição 02 se
-sustenta hoje em direção tipográfica e cor, o que foi uma decisão intencional
-— nada de banco de imagens, nada de foto genérica.
+**Correção de um diagnóstico anterior deste próprio documento.** Estava
+escrito aqui que não existia *nenhuma* fotografia de maquiagem no acervo.
+Existe — e era a melhor foto de beleza do projeto, usada só como miniatura
+de capa na Home enquanto a página da edição inteira não tinha fotografia
+nenhuma.
 
-O que a transformaria:
+O que o acervo tem de fato, para a Edição 02:
 
-| Foto | Por que |
-|---|---|
-| **Macro de olhos** com sombra em cor forte | é a prova visual de "cor que revela" |
-| **Macro de boca** com acabamento perolado | mostra a textura que o texto promete |
-| **Antes/depois** de um trabalho real | dá corpo à seção de agendamento |
-| **May maquiando alguém** | mostra o ritual, não só o resultado |
-| **Detalhe de produto de maquiagem** na mão | conecta a edição à vitrine |
+| Arquivo | O que é | Uso hoje |
+|---|---|---|
+| `foto1.jpeg` | Beleza: rosto, maquiagem trabalhada, fundo branco, enquadramento de moda. Limpa. | `makeup-capa.jpg` — capa da edição |
+| `foto5.jpeg` | Moda: pose agachada, verde-limão e turquesa, fundo branco. Tem texto gráfico no topo. | `makeup-presenca.jpg` — abertura (recorte abaixo do texto, em 28%) |
+| `foto6.jpeg` | Moda: sombra turquesa forte, ótimo rosto. **Tem anotações manuscritas por cima.** | não usada |
 
-Formato ideal: **3:4 vertical**, fundo claro ou neutro, sem texto gráfico
-embutido — a tipografia da página já cumpre esse papel.
+Sobre a `foto6`: o rosto é excelente e a sombra turquesa é exatamente a
+paleta da edição, mas as anotações cercam a figura e um recorte limpo do
+rosto sai com ~285×196px — pequeno demais para ter peso editorial. Ficou
+de fora por resolução, não por conteúdo. Se aparecer o arquivo original
+sem as anotações, ele entra direto.
 
-**O lugar já está preparado.** A abertura da Edição 02 usava a `foto6.jpeg`,
-que é uma foto de estúdio da Edição 01 — bonita, mas não é maquiagem, e
-usá-la ali era emprestar material de outra edição para tapar um buraco. Ela
-saiu. No lugar entrou uma **placa de pigmento** (`.placa`), que não imita
-fotografia: é cor sobreposta em multiply, que é do que a edição fala.
+### O que ainda elevaria
 
-Quando a fotografia existir, o comentário `SLOT DE FOTOGRAFIA · EDIÇÃO 02`
-em `edicao/makeup/index.html` traz a marcação pronta. A grade não muda.
+A edição está de pé com o que existe. O que falta é fotografia **de
+maquiagem em primeiro plano** — hoje a cor aparece na roupa e no clima,
+não no produto aplicado:
+
+| Foto | Por que | Formato |
+|---|---|---|
+| **Macro de olhos** com sombra em cor forte | prova visual de "cor que revela" | 4:5 vertical, rosto ocupando 80% do quadro |
+| **Macro de boca** com acabamento perolado | mostra a textura que o texto promete | 1:1, foco na textura |
+| **May maquiando alguém** | mostra o ritual, não só o resultado | 3:4 vertical |
+
+Padrão para casar com o que já existe: **fundo branco ou neutro de
+estúdio**, luz difusa, sem texto gráfico embutido, sem marca d'água.
+Mínimo 1600px no lado maior. A Edição 02 é a edição de estúdio — é esse
+contraste com a Edição 01 (imersão em água e pigmento) que separa os dois
+mundos.
+
+Onde entra: `maylumina/assets/images/`, e o slot é a `<figure>` da seção
+`#ritual` em `edicao/makeup/index.html`. A classe `.figura--recorte` faz
+a figura assentar no papel creme — só funciona com fundo branco puro.
 
 ## 2. Substituir as duas fotos pretas
 
