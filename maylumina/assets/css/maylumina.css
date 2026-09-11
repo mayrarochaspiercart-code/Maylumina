@@ -779,8 +779,13 @@ html:not(.js) .cortina--sobre-foto {
        lá que a sombra precisa ser densa de verdade. Antes o texto ficava
        no meio da foto, com 12% de véu, e simplesmente sumia. */
     linear-gradient(180deg,
-      rgba(42,33,41,0.34) 0%,
-      rgba(42,33,41,0.06) 26%,
+      /* Faixa do topo: é onde senta "MayLumina · Edição 0X", 10,9px em
+         peso 700 — texto pequeno, que exige 4,5:1. Media 1,93:1 na
+         Edição 02 sobre o cabelo claro. A densidade sobe só nesses
+         primeiros pixels e cai logo: a fotografia não é lavada. */
+      rgba(42,33,41,0.76) 0%,
+      rgba(42,33,41,0.68) 9%,
+      rgba(42,33,41,0.08) 28%,
       rgba(42,33,41,0.60) 62%,
       rgba(42,33,41,0.92) 100%),
     /* a cor da edição tinge a sombra — é o que separa a 01 da 02 */
