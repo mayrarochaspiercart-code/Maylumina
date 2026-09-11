@@ -95,7 +95,7 @@
     <div class="masthead__veu" aria-hidden="true"></div>
 
     <div class="masthead__corpo">
-      <p class="ficha entra visivel" style="margin-bottom:1.4rem">
+      <p class="ficha ficha--contida entra visivel" style="margin-bottom:1.4rem">
         <span>MayLumina</span>
         <span class="ficha__risco" aria-hidden="true"></span>
         <span>Edição 01</span>
@@ -126,63 +126,54 @@
     </div>
   </section>
 
-  <!-- ═══ ABERTURA ═══ -->
-  <section class="folha" id="origem" aria-labelledby="titulo-origem">
+  <!-- ═══ A ORIGEM — matéria única ═══
+       Antes isto eram DUAS seções com 3.016px somados: uma só com a
+       manchete e uma foto, outra com o texto. A mesma matéria partida ao
+       meio, com um respiro inteiro no vão. Agora é uma matéria só: a
+       manchete abre, a fotografia fica presa ao lado e o texto corre.
+       A foto2 saiu daqui — ela já é o fundo do hero, e repetir a mesma
+       imagem na mesma página é ruído, não ritmo. -->
+  <section class="folha folha--justa" id="origem" aria-labelledby="titulo-origem">
     <div class="limite">
-      <hr class="fio-luz" style="margin-bottom:var(--respiro)">
-      <div class="spread">
-        <div class="spread__texto">
-          <p class="olho entra">Entre sussurros de luz</p>
-          <h2 id="titulo-origem" class="manchete entra entra-1">
-            Antes de existir <br>a MayLumina, <br>existia uma <em>luz.</em>
-          </h2>
-        </div>
-        <div class="spread__foto entra entra-2">
-          <figure>
-            <img src="/assets/images/foto3.jpeg" width="974" height="1280" loading="lazy" decoding="async"
-                 alt="May imersa em uma banheira de água leitosa tingida de rosa, laranja e azul, segurando uma rosa de pétalas multicoloridas.">
-            <figcaption>A água que vira pigmento</figcaption>
-          </figure>
-        </div>
-      </div>
-    </div>
-  </section>
+      <hr class="fio-luz" style="margin-bottom:calc(var(--respiro) * 0.55)">
 
-  <!-- ═══ HISTÓRIA — coluna presa ═══ -->
-  <section class="folha folha--justa" aria-labelledby="titulo-historia">
-    <div class="limite presa">
-      <div class="presa__midia entra">
-        <img src="/assets/images/foto2.jpeg" width="720" height="1280" loading="lazy" decoding="async"
-             alt="May deitada em uma banheira, vestindo malha de manga longa estampada em ondas de rosa, laranja e azul, sobre água com espuma colorida.">
-      </div>
+      <p class="olho entra">Entre sussurros de luz</p>
+      <h2 id="titulo-origem" class="manchete entra entra-1"
+          style="margin-bottom:calc(var(--respiro) * 0.5); max-width:18ch">
+        Antes de existir <br>a MayLumina, <br>existia uma <em>luz.</em>
+      </h2>
 
-      <div class="presa__fluxo">
-        <h2 id="titulo-historia" class="titulo entra">A história</h2>
+      <div class="presa">
+        <figure class="presa__midia entra">
+          <img src="/assets/images/foto3.jpeg" width="974" height="1280" loading="lazy" decoding="async"
+               alt="May imersa em uma banheira de água leitosa tingida de rosa, laranja e azul, segurando uma rosa de pétalas multicoloridas.">
+          <figcaption>A água que vira pigmento</figcaption>
+        </figure>
 
-        <div>
-          <p class="texto entra">
-            Uma luz que outras pessoas percebiam antes mesmo que eu pudesse
-            entendê-la. Muitas vezes ouvi que carregava algo diferente — uma luz
-            forte, uma energia que fazia parte de quem eu sou.
-          </p>
-          <p class="texto entra">
-            Foi desse sentimento, quase como um pequeno sussurro, que nasceu a
-            MayLumina — <strong>Mayra iluminada.</strong>
-          </p>
-        </div>
+        <div class="presa__fluxo">
+          <div>
+            <p class="texto entra">
+              Uma luz que outras pessoas percebiam antes mesmo que eu pudesse
+              entendê-la. Muitas vezes ouvi que carregava algo diferente — uma
+              luz forte, uma energia que fazia parte de quem eu sou.
+            </p>
+            <p class="texto entra">
+              Foi desse sentimento, quase como um pequeno sussurro, que nasceu a
+              MayLumina — <strong>Mayra iluminada.</strong>
+            </p>
+          </div>
 
-        <div>
-          <p class="texto entra">
-            Mas a MayLumina nunca foi apenas sobre criar uma marca. Ela nasceu
-            para ser um universo com identidade, criatividade e arte. Um lugar
-            onde tudo pudesse carregar um pouco de mim.
-          </p>
-          <p class="texto entra">
-            Aqui as cores ganham vida, as ideias viram criação e minhas mãos se
-            transformam em pincéis. Cada produto, cada detalhe e cada escolha
-            são uma forma de transformar aquilo que existe na minha imaginação
-            em algo real.
-          </p>
+          <div>
+            <p class="texto entra">
+              Mas a MayLumina nunca foi apenas sobre criar uma marca. Ela nasceu
+              para ser um universo com identidade, criatividade e arte.
+            </p>
+            <p class="texto entra">
+              Aqui as cores ganham vida, as ideias viram criação e minhas mãos se
+              transformam em pincéis — cada produto é uma forma de transformar o
+              que existe na imaginação em algo real.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -204,12 +195,9 @@
   <section class="folha" id="processo" aria-labelledby="titulo-processo">
     <div class="limite">
       <p class="olho entra">O processo</p>
-      <h2 id="titulo-processo" class="manchete entra entra-1" style="margin-bottom:var(--gap)">
+      <h2 id="titulo-processo" class="manchete entra entra-1" style="margin-bottom:calc(var(--respiro) * 0.5)">
         Como cada peça <br><em>nasce.</em>
       </h2>
-      <p class="deck entra entra-2" style="max-width:44ch; margin-bottom:calc(var(--respiro) * 0.7)">
-        Da ideia à execução, tudo passa pelas minhas mãos.
-      </p>
 
       <div class="trio">
         <article class="trio__item entra">
@@ -238,9 +226,16 @@
         </article>
 
         <article class="trio__item entra entra-2">
-          <div class="trio__midia">
-            <img src="/assets/images/foto5.jpeg" width="904" height="1280" loading="lazy" decoding="async"
-                 alt="Composição gráfica com a pergunta Quem sou eu? e May agachada, de jaqueta verde-limão e calça turquesa.">
+          <!-- A foto5 estava aqui e saiu: ela carrega a pergunta "QUEM sou
+               eu?" em letras gráficas gravadas na imagem, de outra peça de
+               comunicação, e nada tinha a ver com produto personalizado.
+               Enquanto não houver fotografia de um kit real, o lugar é
+               tipográfico — como nos spreads sem fotografia da Edição 02.
+               Ver docs/ASSET_GAPS.md. -->
+          <div class="trio__midia" style="background:linear-gradient(150deg, var(--turquesa-luz), var(--laranja-luz))">
+            <div style="display:grid;place-items:center;height:100%;padding:1.5rem">
+              <p class="titulo" style="text-align:center;color:var(--tinta)">Feito <br>para uma <br>pessoa só</p>
+            </div>
           </div>
           <h3 class="trio__rotulo">Personalizados</h3>
           <p class="trio__texto">
@@ -271,17 +266,15 @@
   <!-- ═══ VITRINE ═══ -->
   <section class="folha" id="vitrine" aria-labelledby="titulo-vitrine">
     <div class="limite">
-      <div class="ficha entra" style="margin-bottom:1.4rem">
+      <div class="ficha entra" style="margin-bottom:1.2rem">
         <span>A coleção</span>
         <span class="ficha__risco" aria-hidden="true"></span>
         <span>Edição 01</span>
       </div>
-      <h2 id="titulo-vitrine" class="manchete entra entra-1" style="margin-bottom:1.2rem">
-        Cada detalhe nasce <br>para despertar <br>uma <em>sensação.</em>
+      <h2 id="titulo-vitrine" class="manchete entra entra-1"
+          style="margin-bottom:calc(var(--respiro) * 0.45)">
+        Cada detalhe nasce para <br>despertar uma <em>sensação.</em>
       </h2>
-      <p class="deck entra entra-2" style="max-width:42ch; margin-bottom:calc(var(--respiro) * 0.7)">
-        Toque uma peça para conhecer a composição inteira.
-      </p>
 
       <div class="vitrine" id="vitrine-produtos"></div>
     </div>

@@ -581,14 +581,59 @@ section[hidden] { display: none; }
 }
 .cortina.dissolvida { opacity: 0; }
 
-/* Hero com fotografia: a luz não sai de cena por completo — ela fica como
-   um véu, que é o que mantém a manchete legível sobre a imagem. */
-.cortina--sobre-foto.dissolvida { opacity: 0.62; }
-/* Sem JavaScript ninguém dissolve a cortina — então ela já nasce véu, e a
-   fotografia do hero aparece do mesmo jeito. */
-html:not(.js) .cortina--sobre-foto { opacity: 0.62; }
+/* Hero com fotografia: véu LOCALIZADO, não uniforme.
+   O véu de 62% em cima da foto inteira lavava a água, a pele e o pigmento
+   — justamente o assunto da edição — e mesmo assim a ficha media 2,61:1,
+   reprovada. O papel agora entra só onde a tipografia senta: opaco na
+   coluna esquerda, dissolvido antes da metade, com um reforço rasteiro na
+   base. Do meio para a direita a fotografia fica praticamente intacta. */
+/* Sobre fotografia o deck não pode usar tinta suave: ele senta na espuma
+   clara e o contraste cai para 2,5:1. No hero ele assume a tinta cheia. */
+.masthead .deck { color: var(--tinta); }
 
-.masthead__fundo img { object-position: center 28%; }
+/* Ficha que não atravessa a tela: sobre fotografia ela fica na coluna
+   velada, senão a ponta direita cai no cabelo e some. */
+.ficha--contida { max-width: 46ch; }
+.ficha--contida .ficha__risco { flex: 0 1 4rem; }
+
+.cortina--sobre-foto.dissolvida,
+html:not(.js) .cortina--sobre-foto {
+  opacity: 1;
+  animation: none;
+  /* a cortina base escala e anima o próprio fundo; aqui o véu é fixo */
+  background-size: 100% 100%;
+  background-position: 0 0;
+  background:
+    linear-gradient(96deg,
+      var(--papel) 0%,
+      rgba(242, 234, 224, 0.97) 22%,
+      rgba(242, 234, 224, 0.72) 38%,
+      rgba(242, 234, 224, 0.22) 52%,
+      transparent 64%),
+    linear-gradient(to top, rgba(242, 234, 224, 0.72) 0%, transparent 24%);
+}
+
+@media (max-width: 900px) {
+  /* No celular a coluna de texto é a tela inteira: o véu vira vertical,
+     denso embaixo, e o alto da fotografia respira. */
+  .cortina--sobre-foto.dissolvida,
+  html:not(.js) .cortina--sobre-foto {
+    background-size: 100% 100%;
+    background-position: 0 0;
+    background:
+      linear-gradient(to top,
+        var(--papel) 0%,
+        rgba(242, 234, 224, 0.96) 38%,
+        rgba(242, 234, 224, 0.90) 58%,
+        rgba(242, 234, 224, 0.84) 74%,
+        rgba(242, 234, 224, 0.20) 86%,
+        transparent 92%),
+      linear-gradient(to bottom, rgba(242, 234, 224, 0.55) 0%, transparent 14%);
+  }
+}
+
+.masthead__fundo img { object-position: 78% 26%; }
+@media (max-width: 900px) { .masthead__fundo img { object-position: 62% 14%; } }
 
 @keyframes luzViva {
   0%   { background-position: 0% 0%, 100% 0%, 50% 100%, 0% 50%; }
@@ -914,8 +959,17 @@ figcaption {
   gap: clamp(2rem, 5vw, 4rem);
   align-items: start;
 }
-.presa__midia { grid-column: 1 / 6; position: sticky; top: 14vh; }
-.presa__midia img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: center top; }
+.presa__midia { grid-column: 1 / 6; position: sticky; top: 14vh; margin: 0; }
+.presa__midia img {
+  width: 100%;
+  /* Altura ancorada na tela, não na proporção do arquivo: a coluna de
+     texto ao lado é curta, e uma foto de 1.300px deixava 900px de vazio
+     branco à direita. Assim a fotografia fica grande e a matéria fecha. */
+  height: min(76svh, 700px);
+  object-fit: cover;
+  object-position: center 22%;
+}
+.presa__midia figcaption { margin-top: 0.85rem; }
 .presa__fluxo { grid-column: 7 / 13; display: grid; gap: clamp(2.5rem, 6vh, 5rem); }
 
 /* Trio de cards com barra de rótulo */
