@@ -909,6 +909,90 @@ html:not(.js) .cortina--sobre-foto {
   object-fit: cover;
   object-position: center top;
 }
+/* ── COLOFÃO — o fecho da edição no lugar de uma fotografia ───────
+   Não é um placeholder: é o expediente. Folio, manifesto curto, ficha
+   técnica do atendimento e assinatura, sobre papel branco de estúdio —
+   a mesma direção de arte da capa da Edição 02. */
+.colofao__papel {
+  position: relative;
+  background: var(--branco);
+  padding: clamp(1.8rem, 3.4vw, 3.2rem);
+  display: grid;
+  gap: clamp(1.4rem, 2.6vh, 2.2rem);
+  align-content: start;
+}
+.colofao__espectro {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--laranja), var(--pink), var(--roxo), var(--turquesa));
+}
+.colofao__topo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem 1rem;
+  font-size: var(--t-meta);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--tinta-pink);
+  margin-top: 0.4rem;
+}
+.colofao__abertura {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 clamp(1rem, 2.4vw, 1.9rem);
+  align-items: start;
+}
+.colofao__folio {
+  font-family: var(--display);
+  font-variant-numeric: lining-nums;
+  font-size: clamp(3.4rem, 6.5vw, 5.6rem);
+  font-weight: 400;
+  line-height: 0.76;
+  letter-spacing: -0.04em;
+  color: var(--tinta-pink);
+}
+.colofao__manifesto {
+  font-family: var(--display);
+  font-size: clamp(1.45rem, 2.3vw, 2.05rem);
+  font-weight: 400;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  color: var(--tinta);
+}
+.colofao__manifesto em { font-style: italic; }
+
+.colofao__ficha { display: grid; }
+.colofao__ficha > div {
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 0.42fr) 1fr;
+  gap: 0.35rem 1.2rem;
+  padding: 0.72rem 0;
+  border-top: 1px solid rgba(59, 47, 53, 0.16);
+}
+.colofao__ficha > div:last-child { border-bottom: 1px solid rgba(59, 47, 53, 0.16); }
+.colofao__ficha dt {
+  font-size: var(--t-meta);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+  padding-top: 0.22rem;
+}
+.colofao__ficha dd { font-size: 0.95rem; line-height: 1.5; color: var(--tinta); }
+.colofao__pe {
+  font-size: var(--t-meta);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+@media (max-width: 480px) {
+  .colofao__ficha > div { grid-template-columns: 1fr; gap: 0.15rem; }
+}
+
 figcaption {
   margin-top: 0.85rem;
   font-size: var(--t-meta);
@@ -1001,6 +1085,84 @@ figcaption {
   padding: 0.95rem 0.7rem;
 }
 .trio__texto { margin-top: 1.1rem; font-size: 0.98rem; line-height: 1.7; color: var(--tinta-suave); }
+
+/* ── O trio como SEQUÊNCIA, não como grade — a Edição 02 ──────────
+   Três cards do mesmo tamanho, um deles sem fotografia, leem como
+   "faltou uma imagem". Aqui os três deixam de ser intercambiáveis:
+   larguras diferentes, uma abertura tipográfica no papel e um folio
+   numerado sob cada peça. Abertura → matéria → detalhe.
+   Vale só para a Edição 02; a 01 continua com o trio fotográfico. */
+.trio--sequencia {
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.3fr) minmax(0, 0.88fr);
+  gap: clamp(1.1rem, 2.6vw, 2.4rem);
+  counter-reset: presenca;
+  align-items: stretch;
+}
+.trio--sequencia .trio__midia,
+.trio--sequencia .trio__abertura {
+  aspect-ratio: auto;
+  height: clamp(290px, 34vw, 520px);
+}
+
+/* A abertura não tem moldura: é papel com tipo, e isso é a decisão */
+.trio--sequencia .trio__abertura {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 1.4rem;
+  padding-right: clamp(0.5rem, 2vw, 1.6rem);
+  background: none;
+}
+.trio__fio {
+  display: block;
+  width: min(100%, 8rem);
+  height: 2px;
+  background: linear-gradient(90deg, var(--laranja), var(--pink), var(--roxo));
+}
+.trio__frase {
+  font-family: var(--display);
+  font-size: clamp(2rem, 3.6vw, 3.1rem);
+  font-weight: 400;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  color: var(--tinta);
+  text-wrap: balance;
+}
+.trio__frase em { font-style: italic; color: var(--tinta-pink); }
+
+/* O rótulo deixa de ser barra preta centrada e vira folio de revista */
+.trio--sequencia .trio__rotulo {
+  counter-increment: presenca;
+  background: none;
+  color: var(--tinta);
+  text-align: left;
+  padding: 0.85rem 0 0;
+  margin-top: 0.9rem;
+  border-top: 1px solid rgba(59, 47, 53, 0.24);
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.trio--sequencia .trio__rotulo::before {
+  content: counter(presenca, decimal-leading-zero);
+  font-family: var(--display);
+  font-variant-numeric: lining-nums;
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--tinta-pink);
+}
+.trio--sequencia .trio__texto { margin-top: 0.9rem; }
+
+@media (max-width: 860px) {
+  /* Na esteira, a abertura é visivelmente mais estreita que as fotografias:
+     a sequência continua legível como sequência */
+  .trio--sequencia .trio__item--abertura { flex: 0 0 60%; }
+  .trio--sequencia .trio__item--materia  { flex: 0 0 82%; }
+  .trio--sequencia .trio__midia,
+  .trio--sequencia .trio__abertura { height: clamp(300px, 62vw, 420px); }
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    CAPA DE EDIÇÃO COM ESTÚDIO — a Edição 02
@@ -1350,35 +1512,47 @@ figcaption {
 .proxima:hover .proxima__seta { transform: translateX(14px); }
 
 /* ═══════════════════════════════════════════════════════════════════
-   PRODUTOS — vitrine editorial. O card decide; o detalhe conta.
+   PRODUTOS — a peça da edição, não o card da loja.
+   Cada produto ocupa uma linha inteira da revista: prancha fotográfica
+   de um lado, ficha tipográfica do outro, numeração 01/02 como folio e
+   um fio separando uma peça da seguinte. Sem caixa branca, sem sombra,
+   sem grade de catálogo. O papel da página atravessa tudo.
+   A estrutura do DOM é a mesma de sempre — só a apresentação mudou.
    ═══════════════════════════════════════════════════════════════════ */
 .vitrine {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-  gap: clamp(1.2rem, 2.5vw, 2.2rem);
+  grid-template-columns: 1fr;
+  gap: 0;
+  counter-reset: peca;
+  border-top: 1px solid rgba(59, 47, 53, 0.2);
 }
 
 .produto {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: clamp(1.6rem, 5vw, 4.5rem);
+  align-items: stretch;
   text-align: left;
-  background: var(--branco);
+  background: none;
   border: 0;
-  padding: 0;
+  border-bottom: 1px solid rgba(59, 47, 53, 0.2);
+  padding: clamp(1.8rem, 4.5vh, 3.4rem) 0;
   cursor: pointer;
   font: inherit;
   color: inherit;
-  overflow: hidden;
-  transition: transform 0.6s var(--passo-luz), box-shadow 0.6s var(--passo);
+  counter-increment: peca;
+  transition: background 0.6s var(--passo);
 }
-.produto:hover, .produto:focus-visible {
-  transform: translateY(-5px);
-  box-shadow: 0 18px 44px rgba(59, 47, 53, 0.13);
-}
+.produto:hover { background: rgba(255, 255, 255, 0.42); }
+.produto:focus-visible { outline-offset: 6px; }
+
+/* A segunda peça espelha a primeira: a revista nunca repete o mesmo eixo */
+.produto:nth-of-type(even) .produto__midia { grid-column: 2; grid-row: 1; }
+.produto:nth-of-type(even) .produto__ficha { grid-column: 1; grid-row: 1; }
 
 .produto__midia {
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 5 / 4;
   overflow: hidden;
   background: var(--papel-claro);
 }
@@ -1388,7 +1562,7 @@ figcaption {
   object-fit: cover;
   transition: transform 1s var(--passo-luz), opacity 0.6s var(--passo);
 }
-.produto:hover .produto__midia img { transform: scale(1.05); }
+.produto:hover .produto__midia img { transform: scale(1.045); }
 .produto__anima { z-index: 1; opacity: 0; }
 
 .produto__vazio {
@@ -1400,44 +1574,97 @@ figcaption {
   background: linear-gradient(140deg, var(--papel-claro), var(--pink-luz));
 }
 
-.produto__ficha { padding: 1.3rem 1.4rem 1.5rem; display: grid; gap: 0.5rem; }
+/* ── A ficha: folio, nome grande, notas, base ── */
+.produto__ficha {
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-rows: auto auto auto 1fr;
+  max-width: 34ch;
+}
+/* Folio da peça — "01 ─────" */
+.produto__ficha::before {
+  content: counter(peca, decimal-leading-zero);
+  font-family: var(--display);
+  font-variant-numeric: lining-nums;
+  font-size: 1.45rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--tinta-pink);
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid rgba(142, 53, 96, 0.32);
+}
 .produto__nome {
   font-family: var(--display);
-  font-size: 1.55rem;
-  font-weight: 500;
-  line-height: 1.06;
-  letter-spacing: -0.015em;
+  font-size: clamp(1.9rem, 3.2vw, 2.9rem);
+  font-weight: 400;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  margin-top: 0.2rem;
 }
 .produto__notas {
   font-size: var(--t-nota);
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--tinta-suave);
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem 0.55rem;
+  gap: 0.3rem 0.6rem;
 }
 .produto__sep { opacity: 0.5; }
 .produto__base {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 0.35rem;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.8rem;
+  align-self: end;
+  padding-top: 1rem;
 }
-.produto__preco { font-size: 1.2rem; font-weight: 700; color: var(--tinta-pink); }
+.produto__preco {
+  font-family: var(--display);
+  font-variant-numeric: lining-nums;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--tinta-pink);
+}
 .produto__acao {
   font-size: var(--t-meta);
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--tinta);
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid currentColor;
 }
 .produto__acao span { transition: transform 0.45s var(--passo); }
 .produto:hover .produto__acao span { transform: translateX(5px); }
+
+/* O esqueleto não recebe folio: ele é espera, não peça */
+.esqueleto .produto__ficha::before { content: none; }
+/* Cada peça ocupa uma linha inteira, então a espera não precisa imitar o
+   catálogo inteiro: duas linhas já dizem "vêm peças aí" sem reservar mais
+   altura do que a seção vai ter. Três fantasmas de linha cheia faziam a
+   página encolher meio milhar de pixels quando o Supabase respondia. */
+.vitrine .esqueleto:nth-child(n+3) { display: none; }
+
+@media (max-width: 760px) {
+  .produto {
+    grid-template-columns: 1fr;
+    gap: 1.3rem;
+    padding: clamp(1.6rem, 4vh, 2.4rem) 0;
+  }
+  /* No celular a prancha vem sempre antes da ficha — inclusive na peça par */
+  .produto:nth-of-type(even) .produto__midia { grid-column: 1; grid-row: 1; }
+  .produto:nth-of-type(even) .produto__ficha { grid-column: 1; grid-row: 2; }
+  .produto__midia { aspect-ratio: 5 / 4; }
+  .produto__ficha { max-width: none; grid-template-rows: none; }
+  .produto__base { align-self: start; }
+}
 
 /* Estados da vitrine */
 .estado {

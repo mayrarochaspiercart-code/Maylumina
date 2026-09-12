@@ -206,12 +206,11 @@
         A mesma mulher, <br>em três <em>luzes.</em>
       </h2>
 
-      <div class="trio">
-        <article class="trio__item entra">
-          <div class="trio__midia" style="background:linear-gradient(150deg, var(--laranja-luz), var(--pink-luz))">
-            <div style="display:grid;place-items:center;height:100%;padding:1.5rem">
-              <p class="titulo" style="text-align:center;color:var(--tinta)">Pele <br>que respira</p>
-            </div>
+      <div class="trio trio--sequencia">
+        <article class="trio__item trio__item--abertura entra">
+          <div class="trio__abertura">
+            <span class="trio__fio" aria-hidden="true"></span>
+            <p class="trio__frase">Pele <em>que respira</em></p>
           </div>
           <h3 class="trio__rotulo">Luz natural</h3>
           <p class="trio__texto">
@@ -220,7 +219,7 @@
           </p>
         </article>
 
-        <article class="trio__item entra entra-1">
+        <article class="trio__item trio__item--materia entra entra-1">
           <div class="trio__midia">
             <img src="/assets/images/makeup-gesto.jpg" width="855" height="1140"
                  loading="lazy" decoding="async"
@@ -234,7 +233,7 @@
           </p>
         </article>
 
-        <article class="trio__item entra entra-2">
+        <article class="trio__item trio__item--detalhe entra entra-2">
           <div class="trio__midia">
             <img src="/assets/images/makeup-boca.jpg" width="658" height="878"
                  loading="lazy" decoding="async"
@@ -289,13 +288,38 @@
           </p>
         </div>
 
-        <div class="spread__foto entra entra-2">
-          <figure>
-            <img src="/assets/images/foto1.jpeg" width="1122" height="1402" loading="lazy" decoding="async"
-                 alt="May deitada sobre fundo claro, cabelo ruivo espalhado, vestindo jaqueta e shorts jeans, estendendo a mão para a câmera.">
-            <figcaption>May Rocha</figcaption>
-          </figure>
-        </div>
+        <!-- Fecho da edição: colofão de estúdio.
+             A fotografia que vivia aqui era a mesma da capa desta edição —
+             a revista não repete a capa no miolo. No lugar dela entra o
+             expediente do atendimento: folio, ficha técnica e assinatura,
+             em papel branco de estúdio, que é a direção de arte da 02. -->
+        <aside class="spread__foto colofao entra entra-2" aria-label="Ficha desta edição">
+          <div class="colofao__papel">
+            <span class="colofao__espectro" aria-hidden="true"></span>
+
+            <p class="colofao__topo">
+              <span>MayLumina</span>
+              <span class="ficha__risco" aria-hidden="true"></span>
+              <span>Estúdio · 2026</span>
+            </p>
+
+            <div class="colofao__abertura">
+              <p class="colofao__folio" aria-hidden="true">02</p>
+              <p class="colofao__manifesto">
+                Uma data. <em>Um rosto.</em><br>Uma decisão de cor.
+              </p>
+            </div>
+
+            <dl class="colofao__ficha">
+              <div><dt>Atendimento</dt><dd>Presencial, com May</dd></div>
+              <div><dt>Ocasiões</dt><dd>Eventos, ensaios e dias seus</dd></div>
+              <div><dt>Antes</dt><dd>Conversa sobre cor, pele e ocasião</dd></div>
+              <div><dt>Datas</dt><dd>Combinadas com antecedência</dd></div>
+            </dl>
+
+            <p class="colofao__pe">Edição 02 · Cor &amp; Expressão</p>
+          </div>
+        </aside>
       </div>
     </div>
   </section>
