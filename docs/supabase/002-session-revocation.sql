@@ -48,35 +48,200 @@
 -- PRÉ-REQUISITO — LER ANTES DE APLICAR
 -- ───────────────────────────────────────────────────────────────────
 -- e_admin() é SECURITY DEFINER: ela roda com os privilégios do DONO da
--- função, que é quem executar este arquivo (no SQL Editor, o papel
--- postgres). Esse dono precisa conseguir ler auth.sessions — a tabela
--- pertence a supabase_auth_admin.
+-- função. E "create or replace function" NÃO troca o dono — ele fica
+-- sendo quem criou a função na 001. Portanto o papel que interessa NÃO
+-- é quem executa este arquivo: é pg_proc.proowner.
 --
--- Se não conseguir, a função passa a lançar "permission denied for
--- table sessions" e TODA requisição administrativa vira erro: o painel
--- tranca. Por isso a seção 0 abaixo aborta a transação inteira antes de
--- qualquer alteração, em vez de deixar o projeto num estado quebrado.
+-- Esse dono precisa de duas coisas:
 --
--- Confira também, sem aplicar nada:
---   select has_table_privilege(current_user, 'auth.sessions', 'SELECT');
---   -- precisa voltar true
+--   1. Ler auth.sessions (a tabela pertence a supabase_auth_admin). Sem
+--      isso a função lança "permission denied for table sessions" e TODA
+--      requisição administrativa vira erro: o painel tranca.
+--
+--   2. Escapar do RLS de public.admins, que e_admin() lê por dentro.
+--      Se o dono estiver sujeito ao RLS dessa tabela há dois desfechos,
+--      os dois fatais e os dois reproduzidos em ensaio:
+--        * nenhuma policy de admins alcança o papel do dono (é o caso
+--          aqui: a policy é TO authenticated e o dono não é
+--          authenticated) → a leitura volta zero linhas e e_admin()
+--          devolve false para sempre; o painel morre em silêncio;
+--        * alguma policy alcança o papel do dono → ela chama e_admin(),
+--          que lê admins de novo, e o Postgres aborta com "stack depth
+--          limit exceeded".
+--      O escape vale por superuser, por BYPASSRLS, ou por ter os
+--      privilégios do dono da tabela com FORCE ROW LEVEL SECURITY
+--      desligado.
+--
+-- E quem EXECUTA precisa de uma terceira: ter os direitos do dono, senão
+-- o próprio "create or replace function" é recusado pelo Postgres.
+--
+-- A seção 0 confere as três coisas nos papéis certos e aborta a transação
+-- inteira antes de qualquer alteração. A seção 3 vai além e EXECUTA a
+-- função já com a policy nova no lugar, ainda dentro da transação — é a
+-- prova que introspecção de catálogo não dá.
+--
+-- Para ver o diagnóstico sem aplicar nada, rode só isto no SQL Editor:
+--
+--   select r.rolname                                     as dono_da_funcao,
+--          current_user                                  as quem_executa,
+--          has_schema_privilege(r.rolname,'auth','USAGE')            as usa_auth,
+--          has_table_privilege(r.rolname,'auth.sessions','SELECT')   as le_sessions,
+--          ro.rolsuper                                   as dono_superuser,
+--          ro.rolbypassrls                               as dono_bypassrls,
+--          (select rr.rolname from pg_class c join pg_roles rr on rr.oid=c.relowner
+--            where c.oid='public.admins'::regclass)      as dono_admins,
+--          (select c.relforcerowsecurity from pg_class c
+--            where c.oid='public.admins'::regclass)      as admins_force_rls,
+--          pg_has_role(current_user, r.rolname, 'USAGE') as posso_substituir
+--     from pg_proc p
+--     join pg_namespace n on n.oid = p.pronamespace
+--     join pg_roles     r on r.oid = p.proowner
+--     join pg_roles    ro on ro.rolname = r.rolname
+--    where n.nspname = 'public'
+--      and p.proname = 'e_admin'
+--      and pg_get_function_identity_arguments(p.oid) = '';
+--
+--   -- precisam voltar true: usa_auth, le_sessions, posso_substituir, e
+--   -- pelo menos um entre (dono_superuser, dono_bypassrls, dono_admins =
+--   -- dono_da_funcao com admins_force_rls = false).
+--   -- Num projeto Supabase comum tudo isso e postgres e todas voltam true.
 -- ═══════════════════════════════════════════════════════════════════
 
 begin;
 
 -- ───────────────────────────────────────────────────────────────────
--- 0. TRAVA DE SEGURANÇA
---    Se o dono desta migration não lê auth.sessions, nada é aplicado.
+-- 0. TRAVA DE SEGURANÇA — OLHANDO O PAPEL CERTO
+--
+--    create or replace function PRESERVA O DONO. Então quem executa
+--    esta migration (current_user) não é necessariamente quem vai rodar
+--    a e_admin() endurecida: SECURITY DEFINER roda como o DONO. Checar
+--    current_user aqui seria checar o papel errado — e passar quando
+--    devia abortar.
+--
+--    O dono real sai de pg_proc.proowner. Se a função ainda não existir
+--    (instalação limpa), o dono será current_user, porque é ele que o
+--    create vai registrar.
+--
+--    Quatro condições, todas sobre o DONO REAL:
+--      a) USAGE no schema auth;
+--      b) SELECT em auth.sessions;
+--      c) escapar do RLS de public.admins. e_admin() lê essa tabela por
+--         dentro; se o dono estiver sujeito ao RLS dela, quebra de um de
+--         dois jeitos, ambos fatais: sem policy que alcance o papel do
+--         dono, a leitura volta zero linhas e e_admin() fica false para
+--         sempre (painel morto em silêncio); com policy que alcance, ela
+--         chama e_admin() de novo e vira recursão. O escape vale por ser
+--         superuser, por ter BYPASSRLS, ou por ter os privilégios do dono
+--         da tabela COM force row level security desligado;
+--      d) a leitura de verdade, provada na seção 3 depois que função e
+--         policy já estão no lugar — introspecção pode mentir, executar
+--         não.
 -- ───────────────────────────────────────────────────────────────────
 do $$
+declare
+  dono_fn    name;
+  dono_tab   name;
+  force_rls  boolean;
+  eh_super   boolean;
+  tem_bypass boolean;
+  usa_auth   boolean;
+  le_sessoes boolean;
+  escapa_rls boolean;
+  herda_dono boolean;
+  nova       boolean := false;
 begin
-  if not has_table_privilege(current_user, 'auth.sessions', 'SELECT') then
-    raise exception
-      'ABORTADO: o papel % nao tem SELECT em auth.sessions. Sem isso a '
-      'e_admin() endurecida travaria o painel inteiro. Nada foi alterado.',
-      current_user;
+  -- (1) dono REAL de public.e_admin(), sem argumentos
+  select r.rolname
+    into dono_fn
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    join pg_roles     r on r.oid = p.proowner
+   where n.nspname = 'public'
+     and p.proname = 'e_admin'
+     and pg_get_function_identity_arguments(p.oid) = '';
+
+  if dono_fn is null then
+    dono_fn := current_user;
+    nova := true;
   end if;
-  perform 1 from auth.sessions limit 1;  -- prova de leitura de verdade
+
+  -- (2) dono de public.admins  e  (3) force row level security
+  select r.rolname, c.relforcerowsecurity
+    into dono_tab, force_rls
+    from pg_class c
+    join pg_roles r on r.oid = c.relowner
+   where c.oid = 'public.admins'::regclass;
+
+  -- (4) o que o DONO DA FUNÇÃO consegue
+  select rolsuper, rolbypassrls
+    into eh_super, tem_bypass
+    from pg_roles where rolname = dono_fn;
+
+  usa_auth   := has_schema_privilege(dono_fn, 'auth', 'USAGE');
+  le_sessoes := has_table_privilege(dono_fn, 'auth.sessions', 'SELECT');
+  herda_dono := pg_has_role(dono_fn, dono_tab, 'USAGE');
+  escapa_rls := eh_super or tem_bypass or (not force_rls and herda_dono);
+
+  raise notice '── PRE-CHECK 002 ──────────────────────────────────';
+  raise notice 'quem executa (current_user) . : %', current_user;
+  raise notice 'DONO de public.e_admin() .... : % %',
+        dono_fn, case when nova then '(funcao ainda nao existe; sera este)' else '' end;
+  raise notice 'dono de public.admins ...... : %', dono_tab;
+  raise notice 'admins FORCE ROW LEVEL SEC . : %', force_rls;
+  raise notice 'dono e superuser ........... : %', eh_super;
+  raise notice 'dono tem BYPASSRLS ......... : %', tem_bypass;
+  raise notice 'dono herda o dono da tabela  : %', herda_dono;
+  raise notice 'dono tem USAGE em auth ..... : %', usa_auth;
+  raise notice 'dono tem SELECT em sessions  : %', le_sessoes;
+  raise notice 'dono escapa do RLS de admins : %', escapa_rls;
+  raise notice '───────────────────────────────────────────────────';
+
+  if not usa_auth then
+    raise exception
+      'ABORTADO: o DONO da funcao (%) nao tem USAGE no schema auth. '
+      'A e_admin() endurecida nao conseguiria nem enxergar auth.sessions '
+      'e toda requisicao administrativa viraria erro. Nada foi alterado. '
+      '(quem executa esta migration e %, que nao e o papel que importa aqui)',
+      dono_fn, current_user;
+  end if;
+
+  if not le_sessoes then
+    raise exception
+      'ABORTADO: o DONO da funcao (%) nao tem SELECT em auth.sessions. '
+      'Como SECURITY DEFINER roda com os privilegios do dono, a e_admin() '
+      'endurecida lancaria "permission denied for table sessions" em toda '
+      'requisicao e o painel travaria. Nada foi alterado. '
+      '(quem executa esta migration e %; checar ELE seria checar o papel errado)',
+      dono_fn, current_user;
+  end if;
+
+  -- quem executa precisa dos direitos de dono para poder substituir a
+  -- funcao; senao o create or replace falha com "must be owner of
+  -- function e_admin" no meio do arquivo, em vez de recusar aqui com
+  -- uma mensagem que explica o que fazer.
+  if not pg_has_role(current_user, dono_fn, 'USAGE') then
+    raise exception
+      'ABORTADO: % nao tem os direitos de %, o dono de public.e_admin(), '
+      'entao nao pode substitui-la. Rode esta migration como % (no SQL '
+      'Editor do Supabase isso costuma ser o papel postgres) ou conceda '
+      'a participacao: grant % to %. Nada foi alterado.',
+      current_user, dono_fn, dono_fn, dono_fn, current_user;
+  end if;
+
+  if not escapa_rls then
+    raise exception
+      'ABORTADO: o DONO da funcao (%) esta sujeito ao RLS de public.admins '
+      '(dono da tabela: %, force_rls: %, bypassrls: %, superuser: %). '
+      'e_admin() le public.admins por dentro, entao isso quebra de um de '
+      'dois jeitos, ambos fatais e ambos reproduzidos em ensaio: se '
+      'nenhuma policy de admins alcancar o papel do dono, a leitura volta '
+      'ZERO LINHAS e e_admin() passa a devolver false para sempre — o '
+      'painel morre em silencio; se alguma policy alcancar (por exemplo '
+      'uma policy TO public), ela chama e_admin(), que le admins de novo, '
+      'e o Postgres aborta com "stack depth limit exceeded". '
+      'Nada foi alterado.',
+      dono_fn, dono_tab, force_rls, tem_bypass, eh_super;
+  end if;
 end
 $$;
 
@@ -148,7 +313,8 @@ grant execute on function public.e_admin() to authenticated;
 --    de public.admins; RLS não se aplica ao dono da tabela (a 001 não
 --    usa FORCE ROW LEVEL SECURITY), então o select de dentro da função
 --    não reavalia esta policy. Ensaiado em Postgres descartável antes
---    de chegar aqui; a seção 4.4 confere isso de novo depois de aplicar.
+--    de chegar aqui; a seção 3 executa a função de verdade antes do commit e a 4.4 confere
+--    de novo depois.
 --
 --    Continua sem INSERT/UPDATE/DELETE pelo cliente: a 001 concede
 --    apenas SELECT em public.admins para authenticated, e esta
@@ -161,13 +327,88 @@ create policy "admin vê a si mesmo"
   to authenticated
   using (user_id = auth.uid() and public.e_admin());
 
+-- ───────────────────────────────────────────────────────────────────
+-- 3. PROVA DE EXECUÇÃO — dentro da mesma transação
+--
+--    A seção 0 lê catálogo; catálogo pode estar certo e a execução ainda
+--    falhar. Aqui a função é de fato EXECUTADA, já com a policy nova no
+--    lugar, e o dono é posto à prova de duas maneiras.
+--
+--    (a) public.e_admin() sem JWT nenhum. Isso abre auth.sessions com os
+--        privilégios do DONO: se ele não puder ler, estoura aqui e a
+--        transação inteira volta atrás. Também é aqui que uma recursão
+--        de policy apareceria, como "stack depth limit exceeded".
+--        Sem JWT o resultado correto é false — auth.jwt() é null e o
+--        exists() não casa com nada.
+--
+--    (b) contagem de public.admins vista POR DENTRO do papel do dono.
+--        Isto existe porque (a) sozinha não bastaria: se o dono estiver
+--        sujeito ao RLS de admins e nenhuma policy alcançar o papel
+--        dele, a leitura volta zero linhas, e_admin() devolve false —
+--        e (a) veria exatamente o false que esperava, aprovando uma
+--        função que na prática nunca mais deixaria ninguém administrar
+--        nada. Comparar o que o dono enxerga com o que existe fecha essa
+--        brecha. A seção 0 já garantiu que quem executa tem os direitos
+--        do dono, então o "set local role" abaixo é sempre possível.
+-- ───────────────────────────────────────────────────────────────────
+do $$
+declare
+  dono_fn   name;
+  eu        name := current_user;
+  r         boolean;
+  existem   bigint;
+  vistas    bigint;
+begin
+  select ro.rolname
+    into dono_fn
+    from pg_proc p
+    join pg_namespace n  on n.oid = p.pronamespace
+    join pg_roles     ro on ro.oid = p.proowner
+   where n.nspname = 'public'
+     and p.proname = 'e_admin'
+     and pg_get_function_identity_arguments(p.oid) = '';
+
+  -- (a) executar de verdade
+  select public.e_admin() into r;
+  if r is distinct from false then
+    raise exception
+      'ABORTADO: public.e_admin() devolveu % sem nenhum JWT; o esperado '
+      'e false. Nada foi alterado.', coalesce(r::text, 'null');
+  end if;
+
+  -- (b) o dono enxerga as linhas de admins?
+  select count(*) into existem from public.admins;
+
+  execute format('set local role %I', dono_fn);
+  select count(*) into vistas from public.admins;
+  execute format('set local role %I', eu);
+
+  if existem > 0 and vistas = 0 then
+    raise exception
+      'ABORTADO: o dono da funcao (%) enxerga 0 de % linhas de '
+      'public.admins. e_admin() devolveria false para sempre e ninguem '
+      'conseguiria administrar o site. Nada foi alterado.',
+      dono_fn, existem;
+  end if;
+
+  if existem = 0 then
+    raise notice 'AVISO: public.admins esta vazia, entao a prova (b) nao '
+                 'tem o que comparar. Registre o admin e confira a secao 5.';
+  end if;
+
+  raise notice 'PROVA DE EXECUCAO: e_admin() sem JWT devolveu false, leu '
+               'auth.sessions, nao recursou, e o dono (%) enxerga % de % '
+               'linhas de public.admins. OK.', dono_fn, vistas, existem;
+end
+$$;
+
 commit;
 
 -- ═══════════════════════════════════════════════════════════════════
--- 3. VALIDAÇÃO — rodar logo depois, no mesmo SQL Editor
+-- 4. VALIDAÇÃO — rodar logo depois, no mesmo SQL Editor
 -- ═══════════════════════════════════════════════════════════════════
 
--- 3.1 A função tem o corpo novo? (tem de conter auth.sessions)
+-- 4.1 A função tem o corpo novo? (tem de conter auth.sessions)
 select p.proname,
        p.prosecdef                        as security_definer,
        p.proconfig                        as search_path,
@@ -176,31 +417,31 @@ select p.proname,
   join pg_namespace n on n.oid = p.pronamespace
  where n.nspname = 'public' and p.proname = 'e_admin';
 
--- 3.2 Quem pode executar e_admin()? (esperado: só authenticated)
+-- 4.2 Quem pode executar e_admin()? (esperado: só authenticated)
 select grantee, privilege_type
   from information_schema.routine_privileges
  where routine_schema = 'public' and routine_name = 'e_admin'
  order by grantee;
 
--- 3.3 As policies continuam sendo exatamente 7, e a de admins mudou?
+-- 4.3 As policies continuam sendo exatamente 7, e a de admins mudou?
 select tablename, policyname, cmd, qual
   from pg_policies
  where schemaname = 'public'
  order by tablename, policyname;
 
--- 3.4 Prova de que não há recursão: isto tem de responder, não travar.
+-- 4.4 Prova de que não há recursão: isto tem de responder, não travar.
 --     (como postgres, e_admin() devolve false porque não há JWT — o
 --     que importa é que a consulta RETORNA em vez de estourar a pilha)
 select public.e_admin() as e_admin_sem_jwt;
 
--- 3.5 Os dados continuam intactos (esperado: 2 / 0 / 0 / 1 / 1)
+-- 4.5 Os dados continuam intactos (esperado: 2 / 0 / 0 / 1 / 1)
 select 'produtos' as tabela, count(*) from public.produtos
 union all select 'pedidos',      count(*) from public.pedidos
 union all select 'pedido_itens', count(*) from public.pedido_itens
 union all select 'admin_config', count(*) from public.admin_config
 union all select 'admins',       count(*) from public.admins;
 
--- 3.6 Sessões vivas agora (cada login abre uma; signOut apaga)
+-- 4.6 Sessões vivas agora (cada login abre uma; signOut apaga)
 select s.id as session_id, u.email, s.created_at, s.not_after
   from auth.sessions s
   join auth.users u on u.id = s.user_id
@@ -208,29 +449,29 @@ select s.id as session_id, u.email, s.created_at, s.not_after
  order by s.created_at desc;
 
 -- ═══════════════════════════════════════════════════════════════════
--- 4. VALIDAÇÃO DE FORA, COM HTTP — a que realmente importa
+-- 5. VALIDAÇÃO DE FORA, COM HTTP — a que realmente importa
 -- ═══════════════════════════════════════════════════════════════════
 --   URL=https://SEU-PROJETO.supabase.co
 --   ANON=<chave anon pública>
 --
---   # 4.1 a vitrine não pode quebrar (esperado 200, 2 produtos)
+--   # 5.1 a vitrine não pode quebrar (esperado 200, 2 produtos)
 --   curl -s "$URL/rest/v1/produtos?select=nome&ativo=eq.true" \
 --        -H "apikey: $ANON"
 --
---   # 4.2 login -> guardar o access token
+--   # 5.2 login -> guardar o access token
 --   AT=$(curl -s -X POST "$URL/auth/v1/token?grant_type=password" \
 --        -H "apikey: $ANON" -H 'Content-Type: application/json' \
 --        -d '{"email":"EMAIL_DA_MAY","password":"SENHA"}' \
 --        | python3 -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
 --
---   # 4.3 com sessão viva: tudo responde (esperado 200)
+--   # 5.3 com sessão viva: tudo responde (esperado 200)
 --   for t in produtos pedidos pedido_itens admin_config admins; do
 --     curl -s -o /dev/null -w "$t %{http_code}\n" \
 --       "$URL/rest/v1/$t?select=*&limit=1" \
 --       -H "apikey: $ANON" -H "Authorization: Bearer $AT"
 --   done
 --
---   # 4.4 logout, e DEPOIS o MESMO token — sem esperar o exp
+--   # 5.4 logout, e DEPOIS o MESMO token — sem esperar o exp
 --   curl -s -o /dev/null -w "logout %{http_code}\n" -X POST \
 --     "$URL/auth/v1/logout" -H "apikey: $ANON" -H "Authorization: Bearer $AT"
 --
@@ -257,10 +498,10 @@ select s.id as session_id, u.email, s.created_at, s.not_after
 --   # esperado: []  (nenhuma linha alterada)  — ANTES da 002 isto
 --   # devolvia os 2 produtos.
 --
---   # 4.5 novo login volta a funcionar (sessão nova, token novo)
+--   # 5.5 novo login volta a funcionar (sessão nova, token novo)
 --
 -- ═══════════════════════════════════════════════════════════════════
--- 5. ROLLBACK — volta exatamente ao estado da 001
+-- 6. ROLLBACK — volta exatamente ao estado da 001
 --    Nenhum dado é tocado nem na ida nem na volta.
 -- ═══════════════════════════════════════════════════════════════════
 --
@@ -289,7 +530,7 @@ select s.id as session_id, u.email, s.created_at, s.not_after
 --   commit;
 --
 -- ═══════════════════════════════════════════════════════════════════
--- 6. EFEITOS COLATERAIS CONHECIDOS
+-- 7. EFEITOS COLATERAIS CONHECIDOS
 -- ═══════════════════════════════════════════════════════════════════
 --   * Sessão trocada = poder perdido. Logout em qualquer aba, "sair de
 --     todos os dispositivos" ou expiração de sessão derrubam o token na
