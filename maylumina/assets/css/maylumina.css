@@ -1582,14 +1582,10 @@ figcaption {
   border: 0;
   border-bottom: 1px solid rgba(59, 47, 53, 0.2);
   padding: clamp(1.8rem, 4.5vh, 3.4rem) 0;
-  cursor: pointer;
   font: inherit;
   color: inherit;
   counter-increment: peca;
-  transition: background 0.6s var(--passo);
 }
-.produto:hover { background: rgba(255, 255, 255, 0.42); }
-.produto:focus-visible { outline-offset: 6px; }
 
 /* A segunda peça espelha a primeira: a revista nunca repete o mesmo eixo */
 .produto:nth-of-type(even) .produto__midia { grid-column: 2; grid-row: 1; }
@@ -1597,6 +1593,18 @@ figcaption {
 
 .produto__midia {
   position: relative;
+  /* align-self: start é obrigatório aqui. Com a descrição inteira na
+     ficha, a linha ficou alta; sob align-items: stretch a prancha
+     esticava junto e o aspect-ratio devolvia uma largura maior que a
+     própria coluna — a fotografia vazava por cima do texto. Ancorada no
+     topo, ela tira a altura da largura, como tem de ser. */
+  align-self: start;
+  /* A ficha de um produto pode ser longa. Em vez de deixar meia coluna
+     vazia ao lado do texto, a prancha acompanha a leitura — é a mesma
+     coluna presa que a Edição 01 já usa nas matérias. */
+  position: sticky;
+  top: 12vh;
+  width: 100%;
   aspect-ratio: 5 / 4;
   overflow: hidden;
   background: var(--papel-claro);
@@ -1607,7 +1615,6 @@ figcaption {
   object-fit: cover;
   transition: transform 1s var(--passo-luz), opacity 0.6s var(--passo);
 }
-.produto:hover .produto__midia img { transform: scale(1.045); }
 .produto__anima { z-index: 1; opacity: 0; }
 
 .produto__vazio {
@@ -1622,10 +1629,10 @@ figcaption {
 /* ── A ficha: folio, nome grande, notas, base ── */
 .produto__ficha {
   padding: 0;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
-  grid-template-rows: auto auto auto 1fr;
-  max-width: 34ch;
+  max-width: 46ch;
 }
 /* Folio da peça — "01 ─────" */
 .produto__ficha::before {
@@ -1662,9 +1669,10 @@ figcaption {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 0.6rem 1.8rem;
-  align-self: end;
-  padding-top: 1rem;
+  gap: 0.9rem 1.8rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 1.4rem;
 }
 .produto__preco {
   font-family: var(--display);
@@ -1674,20 +1682,45 @@ figcaption {
   line-height: 1;
   color: var(--tinta-pink);
 }
-.produto__acao {
+/* A descrição inteira, aqui mesmo — não atrás de um clique.
+   Abertura em corpo de leitura; os blocos "Fragâncias"/"Composições"
+   como rótulos; e cada "Nome – explicação" como termo e definição, que
+   é o que o texto da May já é. */
+.produto__descricao { display: grid; gap: 0.85rem; margin-top: 0.35rem; }
+.produto__par {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--tinta-suave);
+}
+.produto__bloco {
   font-size: var(--t-meta);
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--tinta);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-bottom: 0.3rem;
-  border-bottom: 1px solid currentColor;
+  color: var(--tinta-pink);
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(142, 53, 96, 0.28);
 }
-.produto__acao span { transition: transform 0.45s var(--passo); }
-.produto:hover .produto__acao span { transform: translateX(5px); }
+.produto__tecnica { display: grid; gap: 0.6rem; }
+.produto__tecnica > div {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 0.36fr) 1fr;
+  gap: 0.15rem 1.1rem;
+}
+.produto__tecnica dt {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--tinta);
+  line-height: 1.5;
+}
+.produto__tecnica dd {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--tinta-suave);
+}
+
+/* O único elemento clicável da peça */
+.produto__falar { align-self: center; }
 
 /* O esqueleto não recebe folio: ele é espera, não peça */
 .esqueleto .produto__ficha::before { content: none; }
@@ -1697,7 +1730,10 @@ figcaption {
    página encolher meio milhar de pixels quando o Supabase respondia. */
 .vitrine .esqueleto:nth-child(n+3) { display: none; }
 
-@media (max-width: 760px) {
+/* Com a descrição inteira na ficha, duas colunas só se sustentam quando
+   sobra largura de verdade para a prancha: abaixo de 900px ela ficava com
+   menos de 340px ao lado de um texto longo. Aí é melhor empilhar. */
+@media (max-width: 900px) {
   .produto {
     grid-template-columns: 1fr;
     gap: 1.3rem;
@@ -1706,9 +1742,11 @@ figcaption {
   /* No celular a prancha vem sempre antes da ficha — inclusive na peça par */
   .produto:nth-of-type(even) .produto__midia { grid-column: 1; grid-row: 1; }
   .produto:nth-of-type(even) .produto__ficha { grid-column: 1; grid-row: 2; }
-  .produto__midia { aspect-ratio: 5 / 4; }
-  .produto__ficha { max-width: none; grid-template-rows: none; }
-  .produto__base { align-self: start; }
+  .produto__midia { aspect-ratio: 5 / 4; position: relative; top: auto; }
+  .produto__ficha { max-width: none; }
+  .produto__base { margin-top: 1rem; }
+  .produto__tecnica > div { grid-template-columns: 1fr; gap: 0.1rem; }
+  .produto__falar { width: min(100%, 26rem); justify-content: center; }
 }
 
 /* Estados da vitrine */
@@ -1731,71 +1769,6 @@ figcaption {
   animation: pulsa 1.5s infinite;
 }
 @keyframes pulsa { to { transform: translateX(100%); } }
-
-/* ── Gaveta de detalhe do produto ────────────────────────────────── */
-.gaveta {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: grid;
-  justify-items: end;
-  visibility: hidden;
-}
-.gaveta[open], .gaveta.aberta { visibility: visible; }
-
-.gaveta__fundo {
-  position: absolute;
-  inset: 0;
-  background: rgba(42, 33, 41, 0.42);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  opacity: 0;
-  transition: opacity 0.5s var(--passo);
-  border: 0;
-  cursor: pointer;
-}
-.gaveta.aberta .gaveta__fundo { opacity: 1; }
-
-.gaveta__painel {
-  position: relative;
-  width: min(560px, 100%);
-  height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: var(--papel);
-  transform: translateX(100%);
-  transition: transform 0.6s var(--passo-luz);
-  padding: clamp(1.5rem, 4vw, 2.6rem);
-  display: grid;
-  gap: 1.4rem;
-  align-content: start;
-}
-.gaveta.aberta .gaveta__painel { transform: none; }
-
-.gaveta__fechar {
-  position: sticky;
-  top: 0;
-  justify-self: end;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: var(--papel);
-  border: 0;
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--t-meta);
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--tinta);
-  padding: 0.7rem 0.2rem;
-  min-height: 44px;
-}
-.gaveta__foto { width: 100%; aspect-ratio: 1; object-fit: cover; }
-.gaveta__nome { font-family: var(--display); font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1; letter-spacing: -0.025em; }
-.gaveta__preco { font-size: 1.5rem; font-weight: 700; color: var(--tinta-pink); }
-.gaveta__descricao { color: var(--tinta-suave); line-height: 1.8; }
-.gaveta__descricao p + p { margin-top: 0.9rem; }
 
 body.travado { overflow: hidden; }
 
@@ -1900,7 +1873,6 @@ body.travado { overflow: hidden; }
   .banca { grid-template-columns: 1fr; }
   .capa { aspect-ratio: 4 / 5; }
 
-  .gaveta__painel { width: 100%; }
 }
 
 @media (max-width: 480px) {
@@ -1932,6 +1904,6 @@ body.travado { overflow: hidden; }
 }
 
 @media print {
-  .nav, .menu, .gaveta, .faixa, .desce { display: none !important; }
+  .nav, .menu, .faixa, .desce { display: none !important; }
   body { background: #fff; color: #000; }
 }

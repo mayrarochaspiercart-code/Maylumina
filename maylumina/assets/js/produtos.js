@@ -1,6 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════
    MAYLUMINA — VITRINE EDITORIAL
-   O card carrega só o que decide. O texto longo abre numa gaveta.
+   A peça mostra tudo de uma vez: foto, nome, notas, a descrição inteira
+   da cliente e o link direto para conversar no WhatsApp. Nada fica atrás
+   de um clique.
    Todo conteúdo externo entra por textContent: nada de innerHTML.
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -89,12 +91,76 @@ function estado(alvo, titulo, texto, acao) {
   alvo.appendChild(box);
 }
 
-/* ── Card ────────────────────────────────────────────────────────── */
-function montarCard(p, aoAbrir) {
-  const botao = document.createElement('button');
-  botao.type = 'button';
-  botao.className = 'produto entra';
-  botao.setAttribute('aria-haspopup', 'dialog');
+/* ── Descrição ───────────────────────────────────────────────────
+   A descrição vem do Supabase como texto puro escrito pela May, e no
+   texto real aparecem três formas:
+
+     • parágrafo corrido — a abertura do produto;
+     • título de bloco, curto e sem ponto final — "Fragâncias";
+     • item "Nome – explicação" — que é, de fato, termo e definição.
+
+   Reconhecer as três transforma um bloco longo numa ficha que se lê de
+   relance, sem reescrever uma palavra. Se o texto não tiver nenhuma
+   dessas marcas, ele sai como parágrafos e pronto — nada se perde.
+   Tudo entra por textContent: descrição de produto nunca vira HTML. */
+function montarDescricao(texto) {
+  const raiz = document.createElement('div');
+  raiz.className = 'produto__descricao';
+
+  const blocos = String(texto || '')
+    .split(/\n{2,}/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  let lista = null;
+
+  for (const bloco of blocos) {
+    const item = bloco.match(/^([^.!?\n]{2,36}?)\s+[–—]\s+([\s\S]+)$/);
+
+    if (item) {
+      if (!lista) {
+        lista = document.createElement('dl');
+        lista.className = 'produto__tecnica';
+        raiz.appendChild(lista);
+      }
+      const grupo = document.createElement('div');
+      const termo = document.createElement('dt');
+      termo.textContent = item[1].trim();
+      const texto2 = document.createElement('dd');
+      texto2.textContent = item[2].replace(/\s+/g, ' ').trim();
+      grupo.append(termo, texto2);
+      lista.appendChild(grupo);
+      continue;
+    }
+
+    lista = null; // qualquer outro bloco encerra a lista corrente
+
+    const ehTitulo = bloco.length <= 36 && !/[.!?;:]$/.test(bloco) && !bloco.includes('\n');
+    if (ehTitulo) {
+      const titulo = document.createElement('p');
+      titulo.className = 'produto__bloco';
+      titulo.textContent = bloco;
+      raiz.appendChild(titulo);
+      continue;
+    }
+
+    bloco.split('\n').map((l) => l.trim()).filter(Boolean).forEach((linha) => {
+      const par = document.createElement('p');
+      par.className = 'produto__par';
+      par.textContent = linha;
+      raiz.appendChild(par);
+    });
+  }
+
+  return raiz.childElementCount ? raiz : null;
+}
+
+/* ── Peça ────────────────────────────────────────────────────────
+   Deixou de ser botão: não há mais nada para abrir. É um artigo, e o
+   único elemento clicável dentro dele é o link do WhatsApp. */
+function montarCard(p) {
+  const artigo = document.createElement('article');
+  artigo.className = 'produto entra';
 
   const midia = document.createElement('div');
   midia.className = 'produto__midia';
@@ -138,11 +204,11 @@ function montarCard(p, aoAbrir) {
   const ficha = document.createElement('div');
   ficha.className = 'produto__ficha';
 
-  const nome = document.createElement('span');
+  const nome = document.createElement('h3');
   nome.className = 'produto__nome';
   nome.textContent = p.nome;
 
-  const notas = document.createElement('span');
+  const notas = document.createElement('p');
   notas.className = 'produto__notas';
   const listaNotas = extrairNotas(p.descricao, p.categoria);
   listaNotas.forEach((n, k) => {
@@ -156,24 +222,38 @@ function montarCard(p, aoAbrir) {
     }
   });
 
-  const base = document.createElement('span');
+  const descricao = montarDescricao(p.descricao);
+
+  const base = document.createElement('div');
   base.className = 'produto__base';
   if (p.preco != null) {
-    const preco = document.createElement('span');
+    const preco = document.createElement('p');
     preco.className = 'produto__preco';
     preco.textContent = emReais(p.preco);
     base.appendChild(preco);
   }
-  const acao = document.createElement('span');
-  acao.className = 'produto__acao';
-  acao.append('Descobrir', Object.assign(document.createElement('span'), { textContent: '→' }));
-  base.appendChild(acao);
 
-  ficha.append(nome, notas, base);
-  botao.append(midia, ficha);
+  const msg = `Olá! Tenho interesse no produto ${p.nome}` +
+    (p.preco != null ? ` (${emReais(p.preco)})` : '') + '.';
+  const falar = document.createElement('a');
+  falar.className = 'botao produto__falar';
+  falar.href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
+  falar.target = '_blank';
+  falar.rel = 'noopener';
+  falar.append(
+    `Falar sobre ${p.nome}`,
+    Object.assign(document.createElement('span'), {
+      className: 'botao__seta', textContent: '→'
+    })
+  );
+  base.appendChild(falar);
 
-  botao.addEventListener('click', () => aoAbrir(p, botao));
-  return botao;
+  ficha.append(nome, notas);
+  if (descricao) ficha.appendChild(descricao);
+  ficha.appendChild(base);
+
+  artigo.append(midia, ficha);
+  return artigo;
 }
 
 /* ── Animação sob demanda: um único download serve para exibir ───── */
@@ -212,128 +292,6 @@ function animarQuandoVisivel(raiz) {
   alvos.forEach((el) => obs.observe(el));
 }
 
-/* ── Gaveta de detalhe ───────────────────────────────────────────── */
-function criarGaveta() {
-  const raiz = document.createElement('div');
-  raiz.className = 'gaveta';
-  raiz.setAttribute('role', 'dialog');
-  raiz.setAttribute('aria-modal', 'true');
-  raiz.setAttribute('aria-labelledby', 'gaveta-nome');
-  raiz.hidden = true;
-
-  const fundo = document.createElement('button');
-  fundo.className = 'gaveta__fundo';
-  fundo.type = 'button';
-  fundo.setAttribute('aria-label', 'Fechar detalhes do produto');
-
-  const painel = document.createElement('div');
-  painel.className = 'gaveta__painel';
-
-  const fechar = document.createElement('button');
-  fechar.type = 'button';
-  fechar.className = 'gaveta__fechar';
-  fechar.innerHTML = '<span aria-hidden="true">✕</span> Fechar';
-
-  const foto = document.createElement('img');
-  foto.className = 'gaveta__foto';
-  foto.alt = '';
-  foto.loading = 'lazy';
-
-  const nome = document.createElement('h2');
-  nome.className = 'gaveta__nome';
-  nome.id = 'gaveta-nome';
-
-  const preco = document.createElement('p');
-  preco.className = 'gaveta__preco';
-
-  const descricao = document.createElement('div');
-  descricao.className = 'gaveta__descricao';
-
-  const comprar = document.createElement('a');
-  comprar.className = 'botao';
-  comprar.target = '_blank';
-  comprar.rel = 'noopener';
-  comprar.append(
-    'Falar sobre este produto',
-    Object.assign(document.createElement('span'), {
-      className: 'botao__seta', textContent: '→'
-    })
-  );
-
-  painel.append(fechar, foto, nome, preco, descricao, comprar);
-  raiz.append(fundo, painel);
-  document.body.appendChild(raiz);
-
-  let devolverFocoPara = null;
-
-  function abrir(p, origem) {
-    devolverFocoPara = origem;
-    nome.textContent = p.nome;
-    preco.textContent = p.preco != null ? emReais(p.preco) : '';
-    preco.hidden = p.preco == null;
-
-    foto.hidden = !p.imagem_url;
-    if (p.imagem_url) {
-      foto.src = p.imagem_url;
-      foto.alt = `${p.nome} — produto MayLumina`;
-    }
-
-    // Parágrafos por textContent: conteúdo externo nunca vira HTML
-    descricao.replaceChildren();
-    String(p.descricao || '')
-      .split(/\n{2,}|(?<=\.)\s{2,}/)
-      .map((t) => t.trim())
-      .filter(Boolean)
-      .forEach((t) => {
-        const par = document.createElement('p');
-        par.textContent = t;
-        descricao.appendChild(par);
-      });
-
-    const msg = `Olá! Tenho interesse no produto ${p.nome}` +
-      (p.preco != null ? ` (${emReais(p.preco)})` : '') + '.';
-    comprar.href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
-
-    raiz.hidden = false;
-    document.body.classList.add('travado');
-    // O foco só entra depois de a gaveta ficar visível: elemento com
-    // visibility:hidden não aceita foco, e a chamada se perderia.
-    requestAnimationFrame(() => {
-      raiz.classList.add('aberta');
-      fechar.focus();
-    });
-  }
-
-  function fecharGaveta() {
-    raiz.classList.remove('aberta');
-    document.body.classList.remove('travado');
-    const fim = () => { raiz.hidden = true; };
-    setTimeout(fim, 600);
-    devolverFocoPara?.focus();
-  }
-
-  fundo.addEventListener('click', fecharGaveta);
-  fechar.addEventListener('click', fecharGaveta);
-  document.addEventListener('keydown', (e) => {
-    if (raiz.hidden) return;
-    if (e.key === 'Escape') { fecharGaveta(); return; }
-    if (e.key === 'Tab') {
-      const itens = [...painel.querySelectorAll('button, a[href]')].filter(
-        (el) => !el.hidden
-      );
-      if (!itens.length) return;
-      const primeiro = itens[0], ultimo = itens[itens.length - 1];
-      if (e.shiftKey && document.activeElement === primeiro) {
-        e.preventDefault(); ultimo.focus();
-      } else if (!e.shiftKey && document.activeElement === ultimo) {
-        e.preventDefault(); primeiro.focus();
-      }
-    }
-  });
-
-  return abrir;
-}
-
 /* ── Carga ───────────────────────────────────────────────────────── */
 /*
  * `secao` é opcional e resolve o caso da edição que ainda não tem produto:
@@ -349,7 +307,6 @@ export async function carregarProdutos({ alvo, categoria, secao }) {
   const bloco = typeof secao === 'string' ? document.querySelector(secao) : secao;
   const mostrarSecao = () => { if (bloco) bloco.hidden = false; };
 
-  const abrirGaveta = criarGaveta();
   esqueleto(grade);
 
   const filtro = categoria ? `&categoria=eq.${encodeURIComponent(categoria)}` : '';
@@ -398,7 +355,7 @@ export async function carregarProdutos({ alvo, categoria, secao }) {
   mostrarSecao();
   grade.replaceChildren();
   produtos.forEach((p, i) => {
-    const card = montarCard(p, abrirGaveta);
+    const card = montarCard(p);
     card.classList.add(`entra-${Math.min(i, 3)}`);
     grade.appendChild(card);
   });
