@@ -1040,6 +1040,51 @@ figcaption {
   margin-top: 1.8rem;
   letter-spacing: 0.3em;
 }
+/* A linha que prepara a citação — entra baixinho, para a frase seguinte
+   chegar com todo o peso */
+.citacao__entrada {
+  font-size: var(--t-sub);
+  line-height: 1.5;
+  color: var(--tinta-suave);
+  max-width: 34ch;
+  margin: 0 auto 1.6rem;
+  text-wrap: balance;
+}
+
+/* A faísca da May no fim da manchete de abertura. É ornamento: pequena,
+   deslocada para cima e escondida de leitor de tela. */
+.faisca {
+  font-size: 0.3em;
+  vertical-align: 0.9em;
+  margin-left: 0.35em;
+  line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RETRATO ANOTADO — "Quem sou eu?"
+   A fotografia já vem com as setas e as palavras desenhadas por ela.
+   Então a página não escreve nada por cima: só dá papel, escala e
+   silêncio em volta. O multiply funde o fundo branco do recorte no
+   papel creme, como nas outras figuras de estúdio do site.
+   ═══════════════════════════════════════════════════════════════════ */
+.retrato {
+  margin: 0 auto;
+  max-width: min(100%, 720px);
+  text-align: center;
+  /* O papel precisa estar SOB a figura, não só atrás dela. Enquanto a
+     entrada anima, opacity e transform criam contexto de empilhamento e
+     o multiply passa a misturar com o nada — o recorte vira uma caixa
+     branca por quase um segundo. Com o papel aqui, a mistura acontece
+     contra a mesma cor animando ou parada, e a caixa nunca aparece. */
+  background: var(--papel);
+}
+.retrato img {
+  display: block;
+  width: 100%;
+  height: auto;
+  mix-blend-mode: multiply;
+}
+.retrato figcaption { text-align: center; }
 
 /* Coluna presa — texto rola ao lado da imagem parada */
 .presa {
