@@ -1137,6 +1137,11 @@ figcaption {
    larguras diferentes, uma abertura tipográfica no papel e um folio
    numerado sob cada peça. Abertura → matéria → detalhe.
    Vale só para a Edição 02; a 01 continua com o trio fotográfico. */
+/* Com duas peças em vez de três, as larguras mudam: a abertura continua
+   mais estreita que a fotografia, senão o par vira duas colunas iguais e
+   volta a parecer grade. */
+.trio--sequencia.trio--duo { grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr); }
+
 .trio--sequencia {
   grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.3fr) minmax(0, 0.88fr);
   gap: clamp(1.1rem, 2.6vw, 2.4rem);
@@ -1205,6 +1210,14 @@ figcaption {
      a sequência continua legível como sequência */
   .trio--sequencia .trio__item--abertura { flex: 0 0 60%; }
   .trio--sequencia .trio__item--materia  { flex: 0 0 82%; }
+  /* Duas peças não precisam de esteira: cabem uma sob a outra, e aí a
+     fotografia ganha a largura toda em vez de espiar pela borda. */
+  .trio--sequencia.trio--duo {
+    display: grid; grid-template-columns: 1fr; gap: 2.2rem;
+    overflow: visible; margin-inline: 0; padding-inline: 0;
+  }
+  .trio--duo .trio__item { flex: none; }
+  .trio--duo .trio__abertura { height: auto; min-height: 0; }
   .trio--sequencia .trio__midia,
   .trio--sequencia .trio__abertura { height: clamp(300px, 62vw, 420px); }
 }
