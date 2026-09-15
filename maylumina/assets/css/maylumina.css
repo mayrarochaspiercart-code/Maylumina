@@ -909,6 +909,10 @@ html:not(.js) .cortina--sobre-foto {
   object-fit: cover;
   object-position: center top;
 }
+/* Quando a composição da fotografia é o assunto — as duas mãos em volta do
+   rosto, a gargantilha — recortar em 4/5 tira justamente o que ela quis
+   mostrar. Aqui a moldura assume a proporção do arquivo. */
+.spread__foto--inteira img { aspect-ratio: 2 / 3; object-position: center; }
 /* ── COLOFÃO — o fecho da edição no lugar de uma fotografia ───────
    Não é um placeholder: é o expediente. Folio, manifesto curto, ficha
    técnica do atendimento e assinatura, sobre papel branco de estúdio —
@@ -1174,24 +1178,20 @@ figcaption {
    ela tinha no trio: o rosto cabe inteiro. O ar que sobra à direita é
    margem de revista, não buraco. */
 .trio--sequencia.trio--duo {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 526px);
+  /* Duas fotografias agora, não mais uma abertura tipográfica e uma foto.
+     Colunas iguais, e a moldura usa a proporção dos próprios arquivos
+     (855x1140 e 851x1177, os dois perto de 3/4) em vez de um quadrado:
+     assim nenhuma das duas perde rosto em nenhuma largura. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: min(100%, 1120px);
 }
+.trio--sequencia.trio--duo .trio__midia { height: auto; aspect-ratio: 3 / 4; }
 /* A moldura do par tira a altura da PRÓPRIA LARGURA, não da janela. Com a
    altura em vw e a largura fixa, a proporção mudava a cada tamanho de tela
    — a 1.100px a moldura ficava 526x374 e a fotografia, que é retrato
    855x1140, perdia o topo da cabeça e o queixo. Quadrada, ela mostra o
    rosto inteiro em qualquer largura. A abertura estica junto para os fios
    de 01 e 02 continuarem na mesma linha. */
-.trio--sequencia.trio--duo .trio__midia,
-.trio--sequencia.trio--duo .trio__abertura {
-  aspect-ratio: auto;
-  /* a coluna da fotografia é travada em 526px acima de 860, então altura
-     526 é o quadrado exato — e as duas peças partilham a mesma altura,
-     que é o que mantém os fios de 01 e 02 na mesma linha */
-  height: 526px;
-}
-.trio--duo .trio__frase { font-size: clamp(2.2rem, 4.6vw, 4rem); }
-.trio--duo .trio__item--abertura .trio__texto { max-width: 42ch; }
 
 .trio--sequencia {
   grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.3fr) minmax(0, 0.88fr);
@@ -1199,37 +1199,10 @@ figcaption {
   counter-reset: presenca;
   align-items: stretch;
 }
-.trio--sequencia .trio__midia,
-.trio--sequencia .trio__abertura {
+.trio--sequencia .trio__midia {
   aspect-ratio: auto;
   height: clamp(290px, 34vw, 520px);
 }
-
-/* A abertura não tem moldura: é papel com tipo, e isso é a decisão */
-.trio--sequencia .trio__abertura {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 1.4rem;
-  padding-right: clamp(0.5rem, 2vw, 1.6rem);
-  background: none;
-}
-.trio__fio {
-  display: block;
-  width: min(100%, 8rem);
-  height: 2px;
-  background: linear-gradient(90deg, var(--laranja), var(--pink), var(--roxo));
-}
-.trio__frase {
-  font-family: var(--display);
-  font-size: clamp(2rem, 3.6vw, 3.1rem);
-  font-weight: 400;
-  line-height: 1.0;
-  letter-spacing: -0.025em;
-  color: var(--tinta);
-  text-wrap: balance;
-}
-.trio__frase em { font-style: italic; color: var(--tinta-pink); }
 
 /* O rótulo deixa de ser barra preta centrada e vira folio de revista */
 .trio--sequencia .trio__rotulo {
@@ -1259,7 +1232,6 @@ figcaption {
 @media (max-width: 860px) {
   /* Na esteira, a abertura é visivelmente mais estreita que as fotografias:
      a sequência continua legível como sequência */
-  .trio--sequencia .trio__item--abertura { flex: 0 0 60%; }
   .trio--sequencia .trio__item--materia  { flex: 0 0 82%; }
   /* Duas peças não precisam de esteira: cabem uma sob a outra, e aí a
      fotografia ganha a largura toda em vez de espiar pela borda. */
@@ -1272,9 +1244,53 @@ figcaption {
      moldura pode usar a proporção exata da fotografia (855x1140 = 3/4)
      e não cortar absolutamente nada. */
   .trio--sequencia.trio--duo .trio__midia { height: auto; aspect-ratio: 3 / 4; }
-  .trio--sequencia.trio--duo .trio__abertura { height: auto; min-height: 0; }
-  .trio--sequencia .trio__midia,
-  .trio--sequencia .trio__abertura { height: clamp(300px, 62vw, 420px); }
+  .trio--sequencia .trio__midia { height: clamp(300px, 62vw, 420px); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAPA-ARTE — a Edição 01
+   A capa foi desenhada por ela, com masthead, chamadas e tudo. Então a
+   página não monta capa nenhuma por cima: dá papel, centra e mostra a
+   folha inteira, como quem põe a revista na mesa. Sem recorte — uma capa
+   cortada deixa de ser capa.
+   ═══════════════════════════════════════════════════════════════════ */
+.capa-arte {
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  justify-items: center;
+  gap: clamp(1.2rem, 3vh, 2.4rem);
+  padding: calc(var(--respiro) * 0.7) var(--margem) clamp(1.6rem, 4vh, 3rem);
+  background: var(--papel);
+}
+.capa-arte__folha {
+  margin: 0;
+  align-self: center;
+  /* a folha nunca passa da altura da tela nem da largura útil da página */
+  max-height: min(78svh, 900px);
+  display: flex;
+  view-transition-name: capa-ativa;
+}
+.capa-arte__folha img {
+  display: block;
+  max-height: inherit;
+  max-width: 100%;
+  width: auto; height: auto;
+  object-fit: contain;
+  box-shadow: 0 24px 60px rgba(59, 47, 53, 0.18);
+}
+.capa-arte .desce { color: var(--tinta); }
+
+@media (max-width: 760px) {
+  /* No celular quem limita a folha é a largura, não a altura — forçar uma
+     tela inteira só criava vão morto embaixo da capa. A seção passa a ter
+     a altura do que tem dentro. */
+  .capa-arte {
+    min-height: auto;
+    padding: 6rem var(--margem) clamp(2rem, 6vh, 3.4rem);
+    gap: clamp(1.6rem, 5vh, 2.6rem);
+  }
+  .capa-arte__folha { max-height: none; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════

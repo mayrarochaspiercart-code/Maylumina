@@ -41,6 +41,10 @@ CROP = {
     # recortes; este deixa a boca dominante, o nariz parcial, o queixo
     # respirando e os cantos dos labios longe da borda.
     'makeup-boca.jpg': (0.13, 0.18, 0.87, 0.88),
+    # A marca "FaceApp" vem gravada na base do arquivo original. Cortar os
+    # 8% de baixo tira a marca inteira e nao encosta no rosto nem no pincel,
+    # que terminam por volta de 88% da altura.
+    'makeup-pele.jpg': (0.0, 0.0, 1.0, 0.92),
 }
 # Proporcao final forcada, quando o slot exige (corta do centro).
 PROPORCAO = {'makeup-boca.jpg': 0.75}   # 3:4, igual ao card do trio
@@ -61,6 +65,20 @@ ASSETS = {
     'makeup-boca.jpg':   ('makeup-boca',   1140, 120, (0.95, 1.05)),
     'makeup-gesto.jpg':  ('makeup-gesto',  1140, 150, (0.70, 0.85)),
     'bodycare-kit.jpg':  ('bodycare-kit',  1140, 150, (0.70, 0.85)),
+
+    # --- as tres que a May mandou depois do congelamento ---
+    # Abertura da historia da marca na Home. O slot renderiza ~630x787 no
+    # desktop; o original tem 1024x1536, entao 1024 e o maximo sem inventar
+    # pixel. Ela entra no lugar da foto9, que passa a viver so na Edicao 01
+    # — era a unica imagem repetida entre duas paginas do site.
+    'origem-banho.jpg':  ('origem-banho',  1536, 260, (0.60, 0.72)),
+    # Peca "Pele que respira" na Edicao 02. Slot de 526x526 no desktop e
+    # 3/4 no celular; depois do corte da marca sobra 851x1178.
+    'makeup-pele.jpg':   ('makeup-pele',   1178, 160, (0.68, 0.76)),
+    # Capa de revista desenhada por ela, para a Edicao 01. Aparece INTEIRA,
+    # sem recorte, entao o lado maior e a altura e precisa aguentar 2x do
+    # tamanho em que e exibida (~700px de largura).
+    'capa-ed01.jpg':     ('capa-ed01',     1402, 320, (0.76, 0.84)),
 }
 EXTS = ('.jpg', '.jpeg', '.png', '.webp', '.avif', '.tif', '.tiff')
 
