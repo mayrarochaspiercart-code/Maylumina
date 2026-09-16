@@ -36,11 +36,16 @@ const esc = (t) =>
 
 function capaHTML(ed, i) {
   const publicada = ed.status === 'publicada';
+  // Quando a capa JÁ É uma capa — masthead, manchete, chamadas, tudo
+  // desenhado por ela — a banca não monta nada por cima: mostra a folha.
+  // A tipografia do site continua no HTML, só que em .so-leitor, para o
+  // leitor de tela e o buscador não perderem nada.
+  const arte = ed.capa.arte === true;
   const tag = publicada ? 'a' : 'article';
   const p = '        ';
 
   const atributos = [
-    `class="capa iridescente entra entra-${Math.min(i + 1, 3)}${publicada ? '' : ' capa--breve'}"`,
+    `class="capa${arte ? ' capa--arte' : ' iridescente'} entra entra-${Math.min(i + 1, 3)}${publicada ? '' : ' capa--breve'}"`,
     `style="--capa-cor-a:${esc(ed.corLuz)}"`
   ];
   if (publicada) {
@@ -73,8 +78,8 @@ function capaHTML(ed, i) {
     `${p}         width="${ed.capa.largura}" height="${ed.capa.altura}"`,
     `${p}         loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async"${i === 0 ? ' fetchpriority="high"' : ''}>`,
     `${p}  </div>`,
-    `${p}  <div class="capa__luz" aria-hidden="true"></div>`,
-    `${p}  <div class="capa__grade">`,
+    ...(arte ? [] : [`${p}  <div class="capa__luz" aria-hidden="true"></div>`]),
+    `${p}  <div class="capa__grade${arte ? ' so-leitor' : ''}">`,
     `${p}    <div class="capa__topo">`,
     `${p}      <span class="capa__marca">MayLumina</span>`,
     `${p}      <span>Edição ${esc(ed.numero)}</span>`,

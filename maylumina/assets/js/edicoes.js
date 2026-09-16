@@ -22,12 +22,21 @@ export const EDICOES = [
     // Predominância cromática desta edição
     cor: 'var(--pink)',
     corLuz: 'rgba(233, 30, 140, 0.20)',
+    // A capa desta edição é arte da própria May: uma capa de revista
+    // inteira, com masthead, chamadas e assinatura. `arte: true` diz à
+    // banca para mostrar a folha como ela é, sem a tipografia do site
+    // por cima — que repetiria as mesmas palavras.
     capa: {
-      src: '/assets/images/foto3.jpeg',
-      alt: 'May imersa em uma banheira de água leitosa tingida de rosa, ' +
-           'laranja e azul, segurando uma rosa de pétalas multicoloridas.',
-      largura: 974,
-      altura: 1280
+      src: '/assets/images/capa-art-body-care.jpg',
+      alt: 'Capa da Edição 01 da revista MayLumina: May sentada sobre uma poça de tinta ' +
+           'marmorizada em rosa, azul e laranja, com o corpo pintado nas mesmas cores e ' +
+           'o cabelo ruivo longo. No topo, MAYLUMINA em letras de arco-íris; embaixo, ' +
+           '“Autocuidado também é arte”, com a linha “Expresse sua melhor versão”. ' +
+           'Em volta, as chamadas: Beleza com propósito; Cores que cuidam; Glow, por ' +
+           'dentro e por fora; Rituais de beleza; Autoestima em destaque; Bem-estar é beleza.',
+      largura: 1024,
+      altura: 1280,
+      arte: true
     },
     url: '/edicao/art-body-care/',
     // Como os produtos desta edição são encontrados no Supabase

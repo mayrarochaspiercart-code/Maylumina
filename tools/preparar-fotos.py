@@ -79,6 +79,10 @@ ASSETS = {
     # sem recorte, entao o lado maior e a altura e precisa aguentar 2x do
     # tamanho em que e exibida (~700px de largura).
     'capa-ed01.jpg':     ('capa-ed01',     1402, 320, (0.76, 0.84)),
+    # A capa que ela escolheu para a Edicao 01, usada na banca da Home e na
+    # abertura da edicao. Aparece INTEIRA nos dois lugares, entao o lado
+    # maior e a altura e precisa aguentar 2x do maior slot (~660px).
+    'capa-art-body-care.jpg': ('capa-art-body-care', 1280, 300, (0.76, 0.84)),
 }
 EXTS = ('.jpg', '.jpeg', '.png', '.webp', '.avif', '.tif', '.tiff')
 

@@ -749,6 +749,13 @@ html:not(.js) .cortina--sobre-foto {
   transition: transform 0.7s var(--passo-luz);
 }
 .capa:hover, .capa:focus-visible { transform: translateY(-6px); }
+
+/* Capa que já é capa: a folha inteira, na proporção do próprio arquivo,
+   sem véu por cima e sem tipografia do site. A .capa__grade continua no
+   HTML em .so-leitor — quem usa leitor de tela e o buscador continuam
+   recebendo manchete, deck e chamadas. */
+.capa--arte { aspect-ratio: 1024 / 1280; background: var(--papel); }
+.capa--arte .capa__foto img { object-position: center; }
 .capa:hover .iridescente::before,
 .capa:focus-visible .iridescente::before { opacity: 1; }
 .capa:hover::before, .capa:focus-visible::before { opacity: 1; }
