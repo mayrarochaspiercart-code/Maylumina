@@ -83,6 +83,9 @@ ASSETS = {
     # abertura da edicao. Aparece INTEIRA nos dois lugares, entao o lado
     # maior e a altura e precisa aguentar 2x do maior slot (~660px).
     'capa-art-body-care.jpg': ('capa-art-body-care', 1280, 300, (0.76, 0.84)),
+    # A capa da Edicao 02, mesmo tratamento: aparece inteira na banca, entao
+    # o lado maior e a altura e aguenta 2x do card (~660px).
+    'capa-makeup.jpg':   ('capa-makeup',   1402, 300, (0.76, 0.84)),
 }
 EXTS = ('.jpg', '.jpeg', '.png', '.webp', '.avif', '.tif', '.tiff')
 

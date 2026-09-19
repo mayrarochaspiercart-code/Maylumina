@@ -57,13 +57,22 @@ export const EDICOES = [
     chamadas: ['Cor', 'Expressão', 'Identidade', 'Presença'],
     cor: 'var(--roxo)',
     corLuz: 'rgba(139, 79, 159, 0.22)',
+    // Como na Edição 01: a capa é arte dela, com masthead e chamadas. A
+    // banca mostra a folha inteira e guarda a tipografia do site em
+    // .so-leitor — é o que a flag `arte` faz.
     capa: {
-      // Foto sem texto gráfico embutido: a tipografia da capa fica sozinha
-      src: '/assets/images/foto1.jpeg',
-      alt: 'May deitada sobre fundo claro, cabelo ruivo espalhado ao redor do ' +
-           'rosto, maquiagem em tons quentes, vestindo jeans.',
+      src: '/assets/images/capa-makeup.jpg',
+      alt: 'Capa da Edição 02 da revista MayLumina: May de frente, cabelo ruivo preso, ' +
+           'com o dedo sobre os lábios e unhas douradas espelhadas. Metade do rosto é ' +
+           'coberta por maquiagem artística em verde, rosa e azul, com um coração de ' +
+           'cristal rosa na testa, gotas escorrendo e bolhas de sabão iridescentes em ' +
+           'volta. No topo, MAYLUMINA em letras de arco-íris; à esquerda, “Makeup também ' +
+           'é autocuidado”; à direita, “Shhh…” e “Beleza também cura”. Nas laterais: ' +
+           'Cor, arte, sensação, bem-estar, você; A luz também mora em você; Mais que ' +
+           'beleza, ritual; Beleza com propósito.',
       largura: 1122,
-      altura: 1402
+      altura: 1402,
+      arte: true
     },
     url: '/edicao/makeup/',
     categoriaProduto: 'makeup',
