@@ -41,10 +41,6 @@ CROP = {
     # recortes; este deixa a boca dominante, o nariz parcial, o queixo
     # respirando e os cantos dos labios longe da borda.
     'makeup-boca.jpg': (0.13, 0.18, 0.87, 0.88),
-    # A marca "FaceApp" vem gravada na base do arquivo original. Cortar os
-    # 8% de baixo tira a marca inteira e nao encosta no rosto nem no pincel,
-    # que terminam por volta de 88% da altura.
-    'makeup-pele.jpg': (0.0, 0.0, 1.0, 0.92),
 }
 # Proporcao final forcada, quando o slot exige (corta do centro).
 PROPORCAO = {'makeup-boca.jpg': 0.75}   # 3:4, igual ao card do trio
@@ -72,9 +68,9 @@ ASSETS = {
     # pixel. Ela entra no lugar da foto9, que passa a viver so na Edicao 01
     # — era a unica imagem repetida entre duas paginas do site.
     'origem-banho.jpg':  ('origem-banho',  1536, 260, (0.60, 0.72)),
-    # Peca "Pele que respira" na Edicao 02. Slot de 526x526 no desktop e
-    # 3/4 no celular; depois do corte da marca sobra 851x1178.
-    'makeup-pele.jpg':   ('makeup-pele',   1178, 160, (0.68, 0.76)),
+    # Peca "Pele que respira" na Edicao 02. A moldura do par e 3/4 e o
+    # arquivo e 0,80 — o cover come 6% da base, que e chao e gaveta.
+    'makeup-pele.jpg':   ('makeup-pele',   1402, 200, (0.76, 0.84)),
     # Capa de revista desenhada por ela, para a Edicao 01. Aparece INTEIRA,
     # sem recorte, entao o lado maior e a altura e precisa aguentar 2x do
     # tamanho em que e exibida (~700px de largura).
