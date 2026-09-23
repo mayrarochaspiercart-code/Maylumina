@@ -541,6 +541,9 @@ section[hidden] { display: none; }
   grid-template-rows: 1fr auto;
   padding: clamp(6rem, 14vh, 9rem) var(--margem) clamp(1.5rem, 4vh, 2.5rem);
   isolation: isolate;
+  /* o halo da ficha e a varredura de luz sangram alguns pixels para fora;
+     na tela de 320 isso virava barra de rolagem horizontal */
+  overflow: clip;
 }
 
 .masthead__fundo {
@@ -550,45 +553,72 @@ section[hidden] { display: none; }
   overflow: hidden;
   background: var(--papel);
 }
-/* As duas edições têm hero próprio — a capa-arte e a capa de estúdio —
-   mas o fundo em vídeo é o mesmo mecanismo. Estas duas camadas ficam
-   atrás de tudo e herdam as regras de .masthead__fundo logo abaixo. */
-.capa-arte__fundo,
+/* As duas edições abrem com o mesmo mecanismo da Home: o vídeo sangra
+   na tela inteira, atrás de tudo, e só a palavra senta em cima dele. */
 .capa-ed__fundo {
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  background: var(--papel);
+  view-transition-name: capa-ativa;
 }
-.capa-arte__fundo video,
 .capa-ed__fundo video,
 .masthead__fundo video,
 .masthead__fundo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* O vídeo passa por trás de véu e cortina e chega lavado ao olho. Um
+     empurrão de saturação devolve a cor que a marca tem — sem virar
+     filtro: é correção, não efeito. */
+  filter: saturate(1.35) contrast(1.10);
 }
-/* Sobre o vídeo, a página precisa continuar legível: um véu de papel
-   segura o contraste da capa e da tipografia sem apagar o movimento. */
-.capa-arte__fundo::after,
+/* O véu NÃO é uniforme. Um pano de 78% em cima de tudo mata o vídeo
+   justamente onde ele tem mais a mostrar — o meio da tela. O papel entra
+   só onde a tipografia senta: denso no alto, sob a ficha e a navegação,
+   denso embaixo, sob a manchete, e transparente na faixa do meio, que é
+   onde o movimento aparece inteiro. */
 .capa-ed__fundo::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: rgba(242, 234, 224, 0.78);
+  /* As paradas não são estéticas: saíram da medição de onde cada texto
+     senta na altura do hero — navegação 0–9%, ficha 10–20%, manchete
+     40–77%, deck e chamadas 75–95%. Entre a ficha e a manchete há uma
+     faixa sem palavra nenhuma: é ali que o véu chega quase a zero. */
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.80) 0%,
+    rgba(255, 255, 255, 0.54) 12%,
+    rgba(255, 255, 255, 0.46) 20%,
+    rgba(255, 255, 255, 0.14) 31%,
+    rgba(255, 255, 255, 0.14) 40%,
+    rgba(255, 255, 255, 0.26) 52%,
+    rgba(255, 255, 255, 0.38) 66%,
+    rgba(255, 255, 255, 0.62) 80%,
+    rgba(255, 255, 255, 0.80) 100%);
 }
-.capa-ed__fundo::after { background: rgba(255, 255, 255, 0.80); }
+/* A 01 é papel, não estúdio: o mesmo véu, na cor creme da edição. */
+.capa-ed--arte .capa-ed__fundo::after {
+  background: linear-gradient(to bottom,
+    rgba(242, 234, 224, 0.82) 0%,
+    rgba(242, 234, 224, 0.56) 12%,
+    rgba(242, 234, 224, 0.48) 20%,
+    rgba(242, 234, 224, 0.16) 31%,
+    rgba(242, 234, 224, 0.16) 40%,
+    rgba(242, 234, 224, 0.28) 52%,
+    rgba(242, 234, 224, 0.40) 66%,
+    rgba(242, 234, 224, 0.64) 80%,
+    rgba(242, 234, 224, 0.82) 100%);
+}
 
 /* O vídeo é fundo, nunca um player: não recebe toque nem mostra controle */
-.capa-arte__fundo video,
 .capa-ed__fundo video,
 .masthead__fundo video { pointer-events: none; }
-.capa-arte__fundo video::-webkit-media-controls,
 .capa-ed__fundo video::-webkit-media-controls,
 .masthead__fundo video::-webkit-media-controls,
-.capa-arte__fundo video::-webkit-media-controls-start-playback-button,
 .capa-ed__fundo video::-webkit-media-controls-start-playback-button,
 .masthead__fundo video::-webkit-media-controls-start-playback-button {
   display: none !important; -webkit-appearance: none;
@@ -678,10 +708,17 @@ html:not(.js) .cortina--sobre-foto {
   inset: 0;
   z-index: 2;
   pointer-events: none;
+  /* Mesma lógica das edições: denso onde há palavra pequena — navegação
+     no alto, assinatura embaixo — e quase transparente no meio, onde só
+     passam o nome e o conceito, que são tipografia grande. */
   background: linear-gradient(180deg,
-    rgba(242, 234, 224, 0.30) 0%,
-    rgba(242, 234, 224, 0.06) 34%,
-    rgba(242, 234, 224, 0.42) 88%);
+    rgba(242, 234, 224, 0.72) 0%,
+    rgba(242, 234, 224, 0.26) 12%,
+    rgba(242, 234, 224, 0.20) 24%,
+    rgba(242, 234, 224, 0.20) 50%,
+    rgba(242, 234, 224, 0.28) 72%,
+    rgba(242, 234, 224, 0.50) 88%,
+    rgba(242, 234, 224, 0.66) 100%);
 }
 
 .masthead__corpo {
@@ -1286,56 +1323,6 @@ figcaption {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CAPA-ARTE — a Edição 01
-   A capa foi desenhada por ela, com masthead, chamadas e tudo. Então a
-   página não monta capa nenhuma por cima: dá papel, centra e mostra a
-   folha inteira, como quem põe a revista na mesa. Sem recorte — uma capa
-   cortada deixa de ser capa.
-   ═══════════════════════════════════════════════════════════════════ */
-.capa-arte {
-  position: relative;
-  isolation: isolate;
-  min-height: 100svh;
-  display: grid;
-  grid-template-rows: 1fr auto;
-  justify-items: center;
-  gap: clamp(1.2rem, 3vh, 2.4rem);
-  padding: calc(var(--respiro) * 0.7) var(--margem) clamp(1.6rem, 4vh, 3rem);
-  background: var(--papel);
-}
-.capa-arte__folha {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  align-self: center;
-  /* a folha nunca passa da altura da tela nem da largura útil da página */
-  max-height: min(78svh, 900px);
-  display: flex;
-  view-transition-name: capa-ativa;
-}
-.capa-arte__folha img {
-  display: block;
-  max-height: inherit;
-  max-width: 100%;
-  width: auto; height: auto;
-  object-fit: contain;
-  box-shadow: 0 24px 60px rgba(59, 47, 53, 0.18);
-}
-.capa-arte .desce { position: relative; z-index: 1; color: var(--tinta); }
-
-@media (max-width: 760px) {
-  /* No celular quem limita a folha é a largura, não a altura — forçar uma
-     tela inteira só criava vão morto embaixo da capa. A seção passa a ter
-     a altura do que tem dentro. */
-  .capa-arte {
-    min-height: auto;
-    padding: 6rem var(--margem) clamp(2rem, 6vh, 3.4rem);
-    gap: clamp(1.6rem, 5vh, 2.6rem);
-  }
-  .capa-arte__folha { max-height: none; }
-}
-
-/* ═══════════════════════════════════════════════════════════════════
    CAPA DE EDIÇÃO COM ESTÚDIO — a Edição 02
    A Edição 01 é imersão: fotografia sangrando, luz atravessando água.
    A 02 é o oposto deliberado: estúdio, fundo branco, recorte seco. A cor
@@ -1482,6 +1469,75 @@ figcaption {
     white-space: normal;
   }
   .capa-ed__deck { max-width: 100%; }
+}
+
+/* ── Halo de papel sobre vídeo ─────────────────────────────────────
+   O véu grosso lavava o vídeo justamente para salvar a letra pequena.
+   Agora a letra pequena se defende sozinha: um halo de papel de poucos
+   pixels em volta do glifo sustenta o contraste sobre qualquer quadro,
+   e some quando o fundo já é claro. O véu volta a ser composição. */
+[data-hero] { --halo: rgba(242, 234, 224, 0.92); --halo-manta: rgba(242, 234, 224, 0.62); }
+.capa-ed--fundo:not(.capa-ed--arte) { --halo: rgba(255, 255, 255, 0.92); --halo-manta: rgba(255, 255, 255, 0.62); }
+
+[data-hero] .ficha,
+[data-hero] .desce,
+[data-hero] .capa-ed__deck,
+[data-hero] .capa__chamadas,
+[data-hero] .masthead__assinatura {
+  text-shadow: 0 0 2px var(--halo), 0 0 5px var(--halo), 0 0 14px var(--halo);
+}
+
+/* A ficha é a linha mais frágil da capa: corpo pequeno, muito espaçado,
+   e sentada numa faixa onde o véu é quase nada de propósito. Em vez de
+   engrossar o véu naquela altura — o que fecharia a janela do vídeo —
+   ela ganha o próprio halo, uma mancha macia que nasce e morre dentro
+   da linha. Sobre um quadro claro ninguém vê; sobre um escuro, é o que
+   segura a leitura. */
+[data-hero] .ficha { position: relative; isolation: isolate; }
+[data-hero] .ficha::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -0.9em -1.4em;
+  /* sem platô: a mancha nasce no centro da linha e morre antes da borda,
+     senão ela aparece como um retângulo claro sobre a cor do vídeo */
+  background: radial-gradient(60% 150% at 50% 50%, var(--halo-manta) 0%, transparent 70%);
+}
+
+/* ── Capa sem fotografia ───────────────────────────────────────────
+   Sem a foto de estúdio, a composição em faixas do celular não faz mais
+   sentido: não há imagem para a palavra morder. A capa volta a ser uma
+   tela só, em qualquer largura, com o vídeo atrás e o texto por cima. */
+.capa-ed--fundo { background: var(--papel); }
+.capa-ed--arte  { background: var(--papel); }
+/* A cor da edição entra pela palavra: roxo na 02, pink na 01. */
+.capa-ed--arte .capa-ed__manchete b { color: var(--pink); }
+
+/* Sem a fotografia, a ficha tem a página inteira: o risco para de crescer
+   e a linha volta a caber numa só, como cabeçalho de revista. */
+@media (min-width: 901px) {
+  .capa-ed--fundo .capa-ed__rodape .ficha { flex-wrap: nowrap; }
+  .capa-ed--fundo .capa-ed__rodape .ficha__risco { flex: 0 1 5rem; }
+}
+
+@media (max-width: 900px) {
+  .capa-ed--fundo {
+    display: block;
+    height: 100svh;
+    min-height: 34rem;
+  }
+  .capa-ed--fundo .capa-ed__rodape {
+    position: absolute;
+    inset: clamp(5.2rem, 10vh, 7.5rem) var(--margem) auto;
+    margin: 0;
+    padding-inline: 0;
+  }
+  .capa-ed--fundo .capa-ed__corpo {
+    position: absolute;
+    inset: auto var(--margem) clamp(2rem, 5.5vh, 4.2rem) var(--margem);
+    padding-inline: 0;
+    padding-bottom: 0;
+  }
 }
 
 /* Figura recortada — fotografia de estúdio com fundo branco puro

@@ -81,15 +81,13 @@
 
 <main id="conteudo">
 
-  <!-- ═══ CAPA EM MOVIMENTO ═══ -->
-  <!-- A CAPA — arte da May, inteira e sem recorte.
-       Era um hero em HTML com a manchete montada sobre uma fotografia de
-       fundo. Ela desenhou a capa da revista, com masthead, chamadas e
-       tudo, então a capa passa a ser a capa. O h1 e a ficha continuam
-       existindo para leitor de tela e buscador; o que sumiu foi a
-       duplicata visual, não a estrutura da página. -->
-  <section class="capa-arte" data-hero aria-labelledby="titulo-edicao">
-    <div class="capa-arte__fundo">
+  <!-- ═══ CAPA — Edição 01 ═══
+       A abertura é a luz da marca em movimento, sem fotografia por cima:
+       o vídeo sangra na tela inteira e só a palavra senta em cima dele.
+       A capa que ela desenhou continua no site — é o cartão desta edição
+       na banca da Home. Aqui, quem abre a edição é o título. -->
+  <section class="capa-ed capa-ed--fundo capa-ed--arte" data-hero aria-labelledby="titulo-edicao">
+    <div class="capa-ed__fundo">
       <video data-fundo-video
              src="/assets/video/hero-art-body-care.mp4"
              muted autoplay loop playsinline preload="metadata"
@@ -97,26 +95,38 @@
       <div class="cortina" data-cortina aria-hidden="true"></div>
     </div>
 
-    <p class="so-leitor">MayLumina · Edição 01 · Art Body Care</p>
-    <h1 id="titulo-edicao" class="so-leitor">Autocuidado também é arte.</h1>
-    <p class="so-leitor">Cor, aroma, textura e luz. Ritual, aroma, textura, arte na pele.</p>
+    <div class="capa-ed__rodape">
+      <p class="ficha entra visivel">
+        <span>MayLumina</span>
+        <span class="ficha__risco" aria-hidden="true"></span>
+        <span>Edição 01</span>
+        <span class="ficha__risco" aria-hidden="true"></span>
+        <span>Art Body Care</span>
+      </p>
+      <p class="ficha entra visivel"><span>Ateliê · 2026</span></p>
+    </div>
 
-    <figure class="capa-arte__folha">
-      <img src="/assets/images/capa-art-body-care.jpg" width="1024" height="1280"
-           fetchpriority="high" decoding="async"
-           alt="Capa da Edição 01 da revista MayLumina: May sentada sobre uma poça de tinta
-                marmorizada em rosa, azul e laranja, com o corpo pintado nas mesmas cores e o
-                cabelo ruivo longo. No topo, MAYLUMINA em letras de arco-íris; embaixo,
-                “Autocuidado também é arte”, com a linha “Expresse sua melhor versão”. Em
-                volta, as chamadas: Beleza com propósito; Cores que cuidam; Glow, por dentro e
-                por fora; Rituais de beleza; Autoestima em destaque; Bem-estar é beleza.">
-    </figure>
+    <div class="capa-ed__corpo">
+      <h1 id="titulo-edicao" class="capa-ed__manchete" data-refrata>
+        <span class="linha-mascara"><span>Autocuidado</span></span>
+        <span class="linha-mascara"><span>também é</span></span>
+        <span class="linha-mascara"><span><em><b>arte.</b></em></span></span>
+      </h1>
 
-    <a class="desce entra visivel" href="#processo">
-      Ler a edição
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-    </a>
+      <p class="capa-ed__deck entra entra-1">
+        Cor, aroma, textura e luz.
+      </p>
+
+      <ul class="capa__chamadas entra entra-2" style="max-width:38ch">
+        <li>Ritual</li><li>Aroma</li><li>Textura</li><li>Arte na pele</li>
+      </ul>
+
+      <a class="desce entra entra-3" href="#processo">
+        Ler a edição
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </a>
+    </div>
   </section>
 
   <!-- A história da marca vivia aqui e também na Home, palavra por palavra.
