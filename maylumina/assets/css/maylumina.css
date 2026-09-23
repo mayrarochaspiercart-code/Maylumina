@@ -564,11 +564,23 @@ section[hidden] { display: none; }
   background: var(--papel);
   view-transition-name: capa-ativa;
 }
+/* O rodapé do vídeo carrega marca d'água. Em vez de reencodar o arquivo
+   — o que obrigaria a refazer isso a cada peça nova — o corte é do lado
+   do navegador: o vídeo é desenhado mais alto que a moldura e ancorado
+   no topo, e a faixa que sobra embaixo cai fora do overflow. Um número
+   só governa o quanto se perde; 112% deixa de fora os 10,7% de baixo do
+   quadro. Vale para qualquer arquivo que entre no lugar destes. */
+.masthead__fundo,
+.capa-ed__fundo { --altura-video: 112%; }
+
 .capa-ed__fundo video,
 .masthead__fundo video,
 .masthead__fundo img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: var(--altura-video);
   object-fit: cover;
   /* O vídeo passa por trás de véu e cortina e chega lavado ao olho. Um
      empurrão de saturação devolve a cor que a marca tem — sem virar
