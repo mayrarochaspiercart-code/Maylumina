@@ -550,15 +550,46 @@ section[hidden] { display: none; }
   overflow: hidden;
   background: var(--papel);
 }
+/* As duas edições têm hero próprio — a capa-arte e a capa de estúdio —
+   mas o fundo em vídeo é o mesmo mecanismo. Estas duas camadas ficam
+   atrás de tudo e herdam as regras de .masthead__fundo logo abaixo. */
+.capa-arte__fundo,
+.capa-ed__fundo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.capa-arte__fundo video,
+.capa-ed__fundo video,
 .masthead__fundo video,
 .masthead__fundo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+/* Sobre o vídeo, a página precisa continuar legível: um véu de papel
+   segura o contraste da capa e da tipografia sem apagar o movimento. */
+.capa-arte__fundo::after,
+.capa-ed__fundo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgba(242, 234, 224, 0.78);
+}
+.capa-ed__fundo::after { background: rgba(255, 255, 255, 0.80); }
+
 /* O vídeo é fundo, nunca um player: não recebe toque nem mostra controle */
+.capa-arte__fundo video,
+.capa-ed__fundo video,
 .masthead__fundo video { pointer-events: none; }
+.capa-arte__fundo video::-webkit-media-controls,
+.capa-ed__fundo video::-webkit-media-controls,
 .masthead__fundo video::-webkit-media-controls,
+.capa-arte__fundo video::-webkit-media-controls-start-playback-button,
+.capa-ed__fundo video::-webkit-media-controls-start-playback-button,
 .masthead__fundo video::-webkit-media-controls-start-playback-button {
   display: none !important; -webkit-appearance: none;
 }
@@ -1262,6 +1293,8 @@ figcaption {
    cortada deixa de ser capa.
    ═══════════════════════════════════════════════════════════════════ */
 .capa-arte {
+  position: relative;
+  isolation: isolate;
   min-height: 100svh;
   display: grid;
   grid-template-rows: 1fr auto;
@@ -1271,6 +1304,8 @@ figcaption {
   background: var(--papel);
 }
 .capa-arte__folha {
+  position: relative;
+  z-index: 1;
   margin: 0;
   align-self: center;
   /* a folha nunca passa da altura da tela nem da largura útil da página */
@@ -1286,7 +1321,7 @@ figcaption {
   object-fit: contain;
   box-shadow: 0 24px 60px rgba(59, 47, 53, 0.18);
 }
-.capa-arte .desce { color: var(--tinta); }
+.capa-arte .desce { position: relative; z-index: 1; color: var(--tinta); }
 
 @media (max-width: 760px) {
   /* No celular quem limita a folha é a largura, não a altura — forçar uma
@@ -1324,7 +1359,7 @@ figcaption {
 .capa-ed__foto {
   position: absolute;
   inset: 0 0 0 46%;
-  z-index: 0;
+  z-index: 1;
 }
 .capa-ed__foto img {
   width: 100%;

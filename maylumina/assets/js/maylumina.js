@@ -174,6 +174,22 @@ function fundoEmVideo() {
   video.muted = true;
   video.defaultMuted = true;
 
+  // Quem pediu menos movimento não recebe um fundo em loop. O vídeo fica
+  // parado no primeiro quadro, que continua sendo a imagem da marca, e a
+  // cortina se dissolve assim que houver quadro para mostrar.
+  const menosMovimento = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  if (menosMovimento?.matches) {
+    video.removeAttribute('autoplay');
+    video.removeAttribute('loop');
+    video.loop = false;
+    video.pause();
+    const mostrarQuadro = () => cortina?.classList.add('dissolvida');
+    if (video.readyState >= 2) mostrarQuadro();
+    else video.addEventListener('loadeddata', mostrarQuadro, { once: true });
+    video.addEventListener('error', mostrarQuadro, { once: true });
+    return;
+  }
+
   let revelado = false;
   let heroVisivel = true;
 

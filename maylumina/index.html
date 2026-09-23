@@ -95,8 +95,14 @@
   <!-- ═══ MASTHEAD — a luz antes de virar cor ═══ -->
   <section class="masthead" data-hero aria-labelledby="titulo-home">
     <div class="masthead__fundo">
-      <!-- Na Home a luz ainda é una: ela só se refrata dentro de cada edição -->
-      <div class="cortina" aria-hidden="true"></div>
+      <!-- Na Home a luz ainda é una: ela só se refrata dentro de cada edição.
+           Três arquivos de vídeo, um por página, de propósito: cada hero pode
+           receber a sua peça sem mexer nas outras duas. -->
+      <video data-fundo-video
+             src="/assets/video/hero-home.mp4"
+             muted autoplay loop playsinline preload="metadata"
+             aria-hidden="true" tabindex="-1"></video>
+      <div class="cortina" data-cortina aria-hidden="true"></div>
     </div>
     <div class="masthead__veu" aria-hidden="true"></div>
 

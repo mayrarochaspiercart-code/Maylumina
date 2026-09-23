@@ -88,7 +88,15 @@
        tudo, então a capa passa a ser a capa. O h1 e a ficha continuam
        existindo para leitor de tela e buscador; o que sumiu foi a
        duplicata visual, não a estrutura da página. -->
-  <section class="capa-arte" aria-labelledby="titulo-edicao">
+  <section class="capa-arte" data-hero aria-labelledby="titulo-edicao">
+    <div class="capa-arte__fundo">
+      <video data-fundo-video
+             src="/assets/video/hero-art-body-care.mp4"
+             muted autoplay loop playsinline preload="metadata"
+             aria-hidden="true" tabindex="-1"></video>
+      <div class="cortina" data-cortina aria-hidden="true"></div>
+    </div>
+
     <p class="so-leitor">MayLumina · Edição 01 · Art Body Care</p>
     <h1 id="titulo-edicao" class="so-leitor">Autocuidado também é arte.</h1>
     <p class="so-leitor">Cor, aroma, textura e luz. Ritual, aroma, textura, arte na pele.</p>
